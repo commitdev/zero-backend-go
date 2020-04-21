@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <% .Name %>
+spec:
+  template:
+    spec:
+      containers:
+        - name: <% .Name %>
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 0.5
+            limits:
+              memory: 512Mi
+              cpu: 1.0

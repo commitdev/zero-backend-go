@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../base
+
+patchesStrategicMerge:
+- deployment.yml
+
+resources:
+- ingress.yml
+
+configMapGenerator:
+- name: <% .Name %>-config
+  behavior: merge
+  literals:
+    - DATABASE_HOST=<% index .Params `stagingDatabaseHostname` %>
+    - DATABASE_NAME=<% .Name %>-staging
+    - ENVIRONMENT=staging

@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: <% .Name %>
+  annotations:
+    # nginx ingress
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # cert-manager
+    ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
+    # external-dns
+    external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionHost` %>
+
+spec:
+  rules:
+  - host: <% index .Params `productionHost` %>
+    http:
+      paths:
+        - path: /(.*)
+          backend:
+            serviceName: <% .Name %>
+            servicePort: http
+  tls:
+  - hosts:
+    - <% index .Params `productionHost` %>
+    secretName: <% .Name %>-tls-secret

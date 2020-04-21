@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <% .Name %>
+spec:
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: <% .Name %>
+  template:
+    spec:
+      containers:
+        - name: <% .Name %>
+          image: fake-image
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 0.1
+            limits:
+              memory: 256Mi
+              cpu: 0.5
+          livenessProbe:
+            exec:
+              command:
+              - rm
+              - /tmp/service-alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          envFrom:
+          - configMapRef:
+              name: <% .Name %>-config
+          env:
+          - name: DATABASE_USERNAME
+            valueFrom:
+                secretKeyRef:
+                  name: <% .Name %>
+                  key: DATABASE_USERNAME
+          - name: DATABASE_PASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: <% .Name %>
+                  key: DATABASE_PASSWORD
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: <% .Name %>
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: <% .Name %>
+  maxReplicas: 2
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
