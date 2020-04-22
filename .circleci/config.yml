@@ -11,13 +11,9 @@ orbs:
 
 variables:
   - &workspace /home/circleci/project
-  <% if (index .Params `language`) and eq index .Params `language` "go" %>
+
   - &build-image cimg/go:1.13
-  <% else if (index .Params `language`) and eq index .Params `language` "nodejs" %>
-  - &build-image cimg/node:12.6
-  <% else %>
-  - &build-image cimg/base:2020.01
-  <% end %>
+
 
 aliases:
   # Shallow Clone - this allows us to cut the 2 minute repo clone down to about 10 seconds for repos with 50,000 commits+
@@ -83,16 +79,6 @@ aliases:
       git reset --hard "$CIRCLE_SHA1"
       pwd
 
-<% if index .Params `assumeRole` %>
-  - &assume-role
-      name: Assume role
-      command: |
-        RESULT=$(aws sts assume-role --role-arn << parameters.cluster-authentication-role-arn >> --role-session-name deploy)
-        aws configure set aws_access_key_id "$(echo $RESULT | jq -r .Credentials.AccessKeyId)" --profile assumed-role
-        aws configure set aws_secret_access_key "$(echo $RESULT | jq -r .Credentials.SecretAccessKey)" --profile assumed-role
-        aws configure set aws_session_token "$(echo $RESULT | jq -r .Credentials.SessionToken)" --profile assumed-role
-<% end %>
-
   - &install-binaries
       name: Install Binaries
       command: |
@@ -128,40 +114,21 @@ jobs:
 
       - restore_cache: # restores saved cache if no changes are detected since last run
           keys:
-            <% if (index .Params `language`) and eq index .Params `language` "go" %>
             - v1-pkg-cache-{{ checksum "go.sum" }}
-            <% else if (index .Params `language`) and eq index .Params `language` "nodejs" %>
-            - v1-pkg-cache-{{ checksum "package-lock.json" }}
-            <% end %>
             - v1-pkg-cache-
       - run:
           name: Run unit tests
           command: |
-          <% if (index .Params `language`) and eq index .Params `language` "go" %>
             go get -u github.com/jstemmer/go-junit-report
             mkdir -p test-reports
             PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
             echo "Tests: $PACKAGE_NAMES"
             go test -v $PACKAGE_NAMES | go-junit-report > test-reports/junit.xml
-          <% else if (index .Params `language`) and eq index .Params `language` "nodejs" %>
-            npm test
-          <% else %>
-            # Add your command to run unit tests here.
-          <% end %>
-
 
       - save_cache: # Store cache in the /go/pkg directory
-          <% if (index .Params `language`) and eq index .Params `language` "go" %>
           key: v1-pkg-cache-{{ checksum "go.sum" }}
-          <% else if (index .Params `language`) and eq index .Params `language` "nodejs" %>
-          key: v1-pkg-cache-{{ checksum "package-lock.json" }}
-          <% end %>
           paths:
-            <% if (index .Params `language`) and eq index .Params `language` "go" %>
             - "/go/pkg"
-            <% else if (index .Params `language`) and eq index .Params `language` "nodejs" %>
-            - "node_modules"
-            <% end %>
 
       - store_test_results:
           path: test-reports
@@ -174,29 +141,15 @@ jobs:
 
   build_and_push:
     machine:
-      docker_layer_caching: <% if index .Params `circleCIPro` %>true<% else %>false<% end %> # only for performance plan circleci accounts
+      docker_layer_caching: false # only for performance plan circleci accounts
     steps:
       - attach_workspace:
           at: *workspace
       - run: *checkout-shallow
       - version-tag/create
-      <% if index .Params `assumeRole` %>
-      - aws-cli/install
-      - aws-cli/setup
-      - aws-ecr/ecr-login-for-secondary-account:
-          account-id: AWS_ECR_REPO_ACCOUNT_ID
-          region: AWS_DEFAULT_REGION
-      - aws-ecr/build-image:
-          repo: <% .Name %>
-          tag: $VERSION_TAG,latest
-      - aws-ecr/push-image:
-          repo: <% .Name %>
-          tag: $VERSION_TAG,latest
-      <% else %>
       - aws-ecr/build-and-push-image:
-          repo: <% .Name %>
+          repo: ${AWS_ECR_REPO_NAME}
           tag: $VERSION_TAG,latest
-      <% end %>
 
   deploy:
     executor: aws-eks/python3
@@ -281,10 +234,10 @@ workflows:
 
         - deploy:
             name: deploy_staging
-            repo: "<% .Name %>"
-            cluster-name: "<% index .Params `stagingClusterName` %>"
+            repo: "${AWS_ECR_REPO_NAME}"
+            cluster-name: "${STAGING_EKS_CLUSTER_NAME}"
             config-environment: "staging"
-            <% if index .Params `assumeRole` %>cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_STAGING}"<% end %>
+            cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_STAGING}"
             region: "${AWS_DEFAULT_REGION}"
             namespace: "${CIRCLE_BRANCH}"
             tag: "${VERSION_TAG}"
@@ -303,10 +256,10 @@ workflows:
 
         - deploy:
             name: deploy_production
-            repo: "<% .Name %>"
-            cluster-name: "<% index .Params `productionClusterName` %>"
+            repo: "${AWS_ECR_REPO_NAME}"
+            cluster-name: "${PRODUCTION_EKS_CLUSTER_NAME}"
             config-environment: "production"
-            <% if index .Params `assumeRole` %>cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION}"<% end %>
+            cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION}"
             region: "${AWS_DEFAULT_REGION}"
             namespace: "${CIRCLE_BRANCH}"
             tag: "${VERSION_TAG}"

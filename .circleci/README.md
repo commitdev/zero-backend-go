@@ -8,44 +8,10 @@ Requires you to configure the below [CircleCI Environment Variables](https://cir
 
 - AWS_DEFAULT_REGION                    # Region of your cluster
 - AWS_ECR_ACCOUNT_URL                   # {awsAccountNum}.dkr.ecr.{region}.amazonaws.com
+- AWS_ECR_REPO_NAME                     # The ECR repository name to write images to
+- PRODUCTION_EKS_CLUSTER_NAME           # The name of the production EKS cluster to deploy into
+- STAGING_EKS_CLUSTER_NAME              # The name of the staging EKS cluster to deploy into
 
-Required if you have one aws account per environment:
-- AWS_ECR_REPO_ACCOUNT_ID               # AWS account id of the account that contains the ECR repo to use
-- AWS_CLUSTER_AUTH_ROLE_ARN_STAGING     # ARN of the role for the circleci user to assume in staging
-- AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION  # ARN of the role for the circleci user to assume in production
-
-### Parameters
-
-#### language
-
-Options:
-
-- go
-- nodejs
-
-Note: Don't see your language here? Add a pull request. Templates are written using the [Go Templating Language](https://golang.org/pkg/text/template/).
-
-##### assumeRole
-
-Boolean to use the AWS assume role or not. Role you assume is based on clusterAuthenitcationRoleArn.
-You'll need to provide the env vars above if this is true.
-
-##### circleCIPro
-
-If you've got a Performance account with CircleCI enable this for faster docker builds.
-
-##### stagingClusterName
-
-The name of the staging EKS cluster.
-
-##### productionClusterName
-
-The name of the production EKS cluster.
-
-
-### Example
-
-See our [example config](commit0.example.yml) for usage.
 
 ## Deployment Process
 
