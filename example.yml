@@ -4,6 +4,8 @@ name: example-app
 # params are key value pairs passed into templates
 params:
 
+  # Application config
+
   # production host name
   productionHost: fix_me
 
@@ -15,3 +17,11 @@ params:
 
   # staging database hostname
   stagingDatabaseHostname: fix_me
+
+
+  # CircleCI config
+  language: go
+  assumeRole: false
+  circleCIPro: false
+  stagingClusterName: staging
+  productionClusterName: production

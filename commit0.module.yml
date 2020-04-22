@@ -1,0 +1,12 @@
+name: commit0-deployable-backend
+description: 'A deployable project including an application, Dockerfile, CircleCI pipeline, and k8s manifests'
+author: 'Commit'
+icon: ''
+thumbnail: ''
+
+template:
+  strictMode: true
+  delimiters:
+    - '<%'
+    - '%>'
+  output: '.'
