@@ -17,11 +17,3 @@ params:
 
   # staging database hostname
   stagingDatabaseHostname: fix_me
-
-
-  # CircleCI config
-  language: go
-  assumeRole: false
-  circleCIPro: false
-  stagingClusterName: staging
-  productionClusterName: production
