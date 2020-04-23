@@ -4,6 +4,8 @@ name: example-app
 # params are key value pairs passed into templates
 params:
 
+  # Application config
+
   # production host name
   productionHost: fix_me
 
