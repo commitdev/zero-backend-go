@@ -111,7 +111,6 @@ jobs:
     steps: # steps that comprise the `build` job
       - attach_workspace:
           at: *workspace
-
       - restore_cache: # restores saved cache if no changes are detected since last run
           keys:
             - v1-pkg-cache-{{ checksum "go.sum" }}
@@ -121,9 +120,7 @@ jobs:
           command: |
             go get -u github.com/jstemmer/go-junit-report
             mkdir -p test-reports
-            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
-            echo "Tests: $PACKAGE_NAMES"
-            go test -v $PACKAGE_NAMES | go-junit-report > test-reports/junit.xml
+            go test -v ./... | go-junit-report > test-reports/junit.xml
 
       - save_cache: # Store cache in the /go/pkg directory
           key: v1-pkg-cache-{{ checksum "go.sum" }}
@@ -197,7 +194,6 @@ jobs:
       - run: *install-binaries
       - aws-cli/install
       - aws-cli/setup
-      - run: *assume-role
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           cluster-authentication-role-arn: << parameters.cluster-authentication-role-arn >>
