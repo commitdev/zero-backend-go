@@ -197,7 +197,6 @@ jobs:
       - run: *install-binaries
       - aws-cli/install
       - aws-cli/setup
-      - run: *assume-role
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           cluster-authentication-role-arn: << parameters.cluster-authentication-role-arn >>
