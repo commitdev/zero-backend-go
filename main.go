@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"log"
@@ -20,6 +21,17 @@ func main() {
 
 	r := http.NewServeMux()
 	r.HandleFunc("/status/ready", readinessCheckEndpoint)
+
+	// Something for the example frontend to hit
+	r.HandleFunc("/status/about", func(w http.ResponseWriter, r *http.Request) {
+		response, err := json.Marshal(map[string]string{"podName": os.Getenv("POD_NAME")})
+		if err == nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(response)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
