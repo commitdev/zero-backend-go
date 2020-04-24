@@ -5,7 +5,14 @@
 ### Requirements
 
 Requires you to configure the below [CircleCI Environment Variables](https://circleci.com/docs/2.0/env-vars/):
+To get your ECR repositories and EKS clusters:
+```shell
+$ aws ecr describe-repositories --query "repositories[].repositoryUri"
+$ aws eks list-clusters --query "clusters"
+```
 
+- AWS_ACCESS_KEY_ID                     # AWS access key for the circleci user - this should be in AWS secret manager
+- AWS_SECRET_ACCESS_KEY                 # AWS secret for the circleci user - this should be in AWS secret manager
 - AWS_DEFAULT_REGION                    # Region of your cluster
 - AWS_ECR_ACCOUNT_URL                   # {awsAccountNum}.dkr.ecr.{region}.amazonaws.com
 - AWS_ECR_REPO_NAME                     # The ECR repository name to write images to

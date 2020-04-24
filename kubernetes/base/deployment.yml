@@ -37,6 +37,10 @@ spec:
           - configMapRef:
               name: <% .Name %>-config
           env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
           - name: DATABASE_USERNAME
             valueFrom:
                 secretKeyRef:
