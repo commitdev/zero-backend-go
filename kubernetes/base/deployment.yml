@@ -28,19 +28,24 @@ spec:
             periodSeconds: 5
           readinessProbe:
             httpGet:
-              port: http
+              name: http
+              port: 80
               path: /status/ready
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
+          ports:
+            - containerPort: 80
           envFrom:
           - configMapRef:
               name: <% .Name %>-config
           env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+          - name: SERVER_PORT
+            value: "80"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           - name: DATABASE_USERNAME
             valueFrom:
                 secretKeyRef:

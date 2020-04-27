@@ -193,17 +193,20 @@ jobs:
       - version-tag/get
       - run: *install-binaries
       - aws-cli/install
-      - aws-cli/setup
+      - aws-cli/setup:
+          aws-region: AWS_REGION
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           cluster-authentication-role-arn: << parameters.cluster-authentication-role-arn >>
           aws-region: << parameters.region >>
           install-kubectl: true
+          aws-profile: assumed-role
       - queue/until_front_of_line:
           time: '30'
       - run:
           name: Deploy
           command: |
+            kubectl create namespace << parameters.namespace >> || echo "Namespace already exists"
             cd kubernetes/overlays/<< parameters.config-environment >>
             IMAGE=${AWS_ECR_ACCOUNT_URL}/<< parameters.repo >>
             kustomize edit set image fake-image=${IMAGE}:${VERSION_TAG}
@@ -233,8 +236,8 @@ workflows:
             cluster-name: "${STAGING_EKS_CLUSTER_NAME}"
             config-environment: "staging"
             cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_STAGING}"
-            region: "${AWS_DEFAULT_REGION}"
-            namespace: "${CIRCLE_BRANCH}"
+            region: "${AWS_REGION}"
+            namespace: "${AWS_ECR_REPO_NAME}"
             tag: "${VERSION_TAG}"
             requires:
               - build_and_push
@@ -255,8 +258,8 @@ workflows:
             cluster-name: "${PRODUCTION_EKS_CLUSTER_NAME}"
             config-environment: "production"
             cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION}"
-            region: "${AWS_DEFAULT_REGION}"
-            namespace: "${CIRCLE_BRANCH}"
+            region: "${AWS_REGION}"
+            namespace: "${AWS_ECR_REPO_NAME}"
             tag: "${VERSION_TAG}"
             requires:
               - queue/block_workflow

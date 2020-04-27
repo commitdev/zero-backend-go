@@ -1,13 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-bases:
-- ../../base
-
 patchesStrategicMerge:
 - deployment.yml
 
 resources:
+- ../../base
 - ingress.yml
 
 configMapGenerator:
