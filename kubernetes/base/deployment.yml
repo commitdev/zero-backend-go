@@ -28,14 +28,14 @@ spec:
             periodSeconds: 5
           readinessProbe:
             httpGet:
-              name: http
-              port: 80
+              port: http
               path: /status/ready
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
           ports:
             - containerPort: 80
+              name: http
           envFrom:
           - configMapRef:
               name: <% .Name %>-config
