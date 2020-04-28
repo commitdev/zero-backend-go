@@ -33,14 +33,19 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
+          ports:
+            - containerPort: 80
+              name: http
           envFrom:
           - configMapRef:
               name: <% .Name %>-config
           env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+          - name: SERVER_PORT
+            value: "80"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           - name: DATABASE_USERNAME
             valueFrom:
                 secretKeyRef:

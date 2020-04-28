@@ -17,7 +17,7 @@ Application secrets are stored in the kubernetes secrets management system, wher
 
 ## Adding a new secret to staging / production kuberenetes
 (Similar to the dev process)
-1. Download the `secrets.env` and `settings.ini` for the correct environment from lastpass
+1. Download the `secrets.env` for the correct environment from where it is stored
 2. Make sure your `kubectl` context is set to the proper environment
 3. Run `kubectl apply -k .`  (Change the namespace if necessary using `-n <namespace>`)
 
