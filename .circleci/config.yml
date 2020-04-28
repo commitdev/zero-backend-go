@@ -200,7 +200,6 @@ jobs:
           cluster-authentication-role-arn: << parameters.cluster-authentication-role-arn >>
           aws-region: << parameters.region >>
           install-kubectl: true
-          aws-profile: assumed-role
       - queue/until_front_of_line:
           time: '30'
       - run:
