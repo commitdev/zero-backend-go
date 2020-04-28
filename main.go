@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/rs/cors"
 )
 
 const gracefulShutdownTimeout = 10 * time.Second
@@ -37,8 +39,11 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
+	// Change this to a more strict CORS policy
+	handler := cors.Default().Handler(r)
+
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
-	server := &http.Server{Addr: serverAddress, Handler: r}
+	server := &http.Server{Addr: serverAddress, Handler: handler}
 
 	// Watch for signals to handle graceful shutdown
 	stop := make(chan os.Signal, 1)
