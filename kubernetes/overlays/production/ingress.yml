@@ -10,11 +10,11 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
     # external-dns
-    external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionHost` %>
+    external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionBackendHost` %>
 
 spec:
   rules:
-  - host: <% index .Params `productionHost` %>
+  - host: <% index .Params `productionBackendHost` %>
     http:
       paths:
         - path: /(.*)
@@ -23,5 +23,5 @@ spec:
             servicePort: http
   tls:
   - hosts:
-    - <% index .Params `productionHost` %>
+    - <% index .Params `productionBackendHost` %>
     secretName: <% .Name %>-tls-secret
