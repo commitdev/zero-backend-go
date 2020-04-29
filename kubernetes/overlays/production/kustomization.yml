@@ -6,8 +6,8 @@ patchesStrategicMerge:
 
 resources:
 - ../../base
-- ingress.yaml
-- pdb.yaml
+- ingress.yml
+- pdb.yml
 
 configMapGenerator:
 - name: <% .Name %>-config
