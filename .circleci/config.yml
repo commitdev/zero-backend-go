@@ -236,7 +236,7 @@ workflows:
             config-environment: "staging"
             cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_STAGING}"
             region: "${AWS_REGION}"
-            namespace: "${AWS_ECR_REPO_NAME}"
+            namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
             requires:
               - build_and_push
@@ -258,7 +258,7 @@ workflows:
             config-environment: "production"
             cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION}"
             region: "${AWS_REGION}"
-            namespace: "${AWS_ECR_REPO_NAME}"
+            namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
             requires:
               - queue/block_workflow
