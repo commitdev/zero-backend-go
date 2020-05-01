@@ -5,23 +5,12 @@
 ### Requirements
 
 Requires you to configure the below [CircleCI Environment Variables](https://circleci.com/docs/2.0/env-vars/):
-To get your ECR repositories and EKS clusters:
-```shell
-$ aws ecr describe-repositories --query "repositories[].repositoryUri"
-$ aws eks list-clusters --query "clusters"
-```
 
-- AWS_ACCESS_KEY_ID                     # AWS access key for the circleci user - this should be in AWS secret manager
-- AWS_SECRET_ACCESS_KEY                 # AWS secret for the circleci user - this should be in AWS secret manager
-- AWS_REGION                            # Region of your EKS cluster
-- AWS_ECR_ACCOUNT_URL                   # {awsAccountNum}.dkr.ecr.{region}.amazonaws.com
-- AWS_ECR_REPO_NAME                     # The ECR repository name to write images to
-- PRODUCTION_EKS_CLUSTER_NAME           # The name of the production EKS cluster to deploy into
-- STAGING_EKS_CLUSTER_NAME              # The name of the staging EKS cluster to deploy into
-- AWS_CLUSTER_AUTH_ROLE_ARN_STAGING     # The ARN of the role to assume that allows access to the EK cluster. Most likely ends with `kubernetes-admin-staging`
-- AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION  # The ARN of the role to assume that allows access to the EKS cluster. Same as above but for production
-- SLACK_WEBHOOK                         # Webhook for slack notifications. Must be specified, but doesn't need to be set to a real value
-- CIRCLECI_API_KEY                      # Needed for the queueing orb. You can generate this in the project settings in CircleCI. It needs the `status` scope.
+- AWS_ACCESS_KEY_ID         # AWS access key for the circleci user - this should be in AWS secret manager
+- AWS_SECRET_ACCESS_KEY     # AWS secret for the circleci user - this should be in AWS secret manager
+- CIRCLECI_API_KEY          # Needed for the queueing orb. You can generate this in the project settings in CircleCI. It needs the `status` scope.
+
+- SLACK_WEBHOOK             # Webhook for slack notifications. Must only be specified if you uncomment `slack/notify-on-failure`
 
 
 ## Deployment Process

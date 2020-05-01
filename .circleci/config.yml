@@ -133,19 +133,25 @@ jobs:
       - store_artifacts:
           path: test-reports
 
-      # Requires the SLACK_WEBHOOK
-      - slack/notify-on-failure
+      # Requires the SLACK_WEBHOOK env var to be set
+      #- slack/notify-on-failure
 
   build_and_push:
     machine:
       docker_layer_caching: false # only for performance plan circleci accounts
+    parameters:
+      repo:
+        type: string
+        default: ''
+        description: |
+          The name of the ECR repo to push an image to.
     steps:
       - attach_workspace:
           at: *workspace
       - run: *checkout-shallow
       - version-tag/create
       - aws-ecr/build-and-push-image:
-          repo: ${AWS_ECR_REPO_NAME}
+          repo: << parameters.repo >>
           tag: $VERSION_TAG,latest
 
   deploy:
@@ -192,9 +198,10 @@ jobs:
       - run: *checkout-shallow
       - version-tag/get
       - run: *install-binaries
+      - run: # Required by aws-cli
+          command: echo 'export AWS_DEFAULT_REGION=<< parameters.region >>' >> $BASH_ENV
       - aws-cli/install
-      - aws-cli/setup:
-          aws-region: AWS_REGION
+      - aws-cli/setup
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           cluster-authentication-role-arn: << parameters.cluster-authentication-role-arn >>
@@ -207,7 +214,7 @@ jobs:
           command: |
             kubectl create namespace << parameters.namespace >> || echo "Namespace already exists"
             cd kubernetes/overlays/<< parameters.config-environment >>
-            IMAGE=${AWS_ECR_ACCOUNT_URL}/<< parameters.repo >>
+            IMAGE=<% index .Params `accountId` %>.dkr.ecr.<< parameters.region >>.amazonaws.com/<< parameters.repo >>
             kustomize edit set image fake-image=${IMAGE}:${VERSION_TAG}
             kustomize build . | kubectl apply -f - -n << parameters.namespace >>
 workflows:
@@ -222,6 +229,7 @@ workflows:
               - checkout_code
 
         - build_and_push:
+            repo: <% .Name %>
             requires:
               - unit_test
             filters:
@@ -231,11 +239,11 @@ workflows:
 
         - deploy:
             name: deploy_staging
-            repo: "${AWS_ECR_REPO_NAME}"
-            cluster-name: "${STAGING_EKS_CLUSTER_NAME}"
+            repo: "<% .Name %>"
+            cluster-name: "<% .Name %>-staging-<% index .Params `region` %>"
             config-environment: "staging"
-            cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_STAGING}"
-            region: "${AWS_REGION}"
+            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-staging"
+            region: "<% index .Params `region` %>"
             namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
             requires:
@@ -253,11 +261,11 @@ workflows:
 
         - deploy:
             name: deploy_production
-            repo: "${AWS_ECR_REPO_NAME}"
-            cluster-name: "${PRODUCTION_EKS_CLUSTER_NAME}"
+            repo: "<% .Name %>"
+            cluster-name: "<% .Name %>-staging-<% index .Params `region` %>"
             config-environment: "production"
-            cluster-authentication-role-arn: "${AWS_CLUSTER_AUTH_ROLE_ARN_PRODUCTION}"
-            region: "${AWS_REGION}"
+            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-production"
+            region: "<% index .Params `region` %>"
             namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
             requires:
