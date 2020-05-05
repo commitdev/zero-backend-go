@@ -140,16 +140,30 @@ jobs:
     machine:
       docker_layer_caching: false # only for performance plan circleci accounts
     parameters:
+      account-id:
+        type: string
+        default: ''
+        description: |
+          The id of the aws account containing the ECR repo to push an image to.
       repo:
         type: string
         default: ''
         description: |
           The name of the ECR repo to push an image to.
+      region:
+        type: string
+        default: ''
+        description: |
+          The region to use for AWS operations.
     steps:
       - attach_workspace:
           at: *workspace
       - run: *checkout-shallow
       - version-tag/create
+      - run: # Required by aws-cli
+          command: |
+            echo 'export AWS_REGION=<< parameters.region >>' >> $BASH_ENV
+            echo 'export AWS_ECR_ACCOUNT_URL=<< parameters.account-id >>.dkr.ecr.<< parameters.region >>.amazonaws.com' >> $BASH_ENV
       - aws-ecr/build-and-push-image:
           repo: << parameters.repo >>
           tag: $VERSION_TAG,latest
@@ -162,6 +176,11 @@ jobs:
         default: ''
         description: |
           The kubernetes namespace that should be used.
+      account-id:
+        type: string
+        default: ''
+        description: |
+          The id of the aws account containing the ECR repo to push an image to.
       repo:
         type: string
         default: ''
@@ -214,7 +233,7 @@ jobs:
           command: |
             kubectl create namespace << parameters.namespace >> || echo "Namespace already exists"
             cd kubernetes/overlays/<< parameters.config-environment >>
-            IMAGE=<% index .Params `accountId` %>.dkr.ecr.<< parameters.region >>.amazonaws.com/<< parameters.repo >>
+            IMAGE=<< parameters.account-id >>.dkr.ecr.<< parameters.region >>.amazonaws.com/<< parameters.repo >>
             kustomize edit set image fake-image=${IMAGE}:${VERSION_TAG}
             kustomize build . | kubectl apply -f - -n << parameters.namespace >>
 workflows:
@@ -229,7 +248,9 @@ workflows:
               - checkout_code
 
         - build_and_push:
-            repo: <% .Name %>
+            account-id: "<% index .Params `accountId` %>"
+            repo: "<% .Name %>"
+            region: "<% index .Params `region` %>"
             requires:
               - unit_test
             filters:
@@ -239,6 +260,7 @@ workflows:
 
         - deploy:
             name: deploy_staging
+            account-id: "<% index .Params `accountId` %>"
             repo: "<% .Name %>"
             cluster-name: "<% .Name %>-staging-<% index .Params `region` %>"
             config-environment: "staging"
