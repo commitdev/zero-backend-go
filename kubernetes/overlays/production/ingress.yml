@@ -11,6 +11,9 @@ metadata:
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
     # external-dns
     external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionBackendHost` %>
+    # CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `productionFrontendHost` %>/"
 
 spec:
   rules:
