@@ -1,3 +1,3 @@
-# backend
+#  <% .Name %> Backend service
 
-After rendering the template with the `zero` tool, check it into github and run `go mod init github.com/<path on github>`
+After rendering the template with the `zero` tool, check it into github and run `go mod init github.com/<path on github>` to start developing.
