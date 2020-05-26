@@ -1,4 +1,9 @@
-# commit0-deployable-backend
-A commit0 module containing a backend that can be deployed to the infrastructure set up using commit0-aws-eks-stack.
+# Zero Deployable Backend
 
-After rendering the template with the `zero` tool, check it into github and run `go mod init github.com/<path on github>`
+This is a [zero](https://github.com/commitdev/zero) module which sets up a
+service which can be deployed to the environment set up with [zero-aws-eks-stack](https://github.com/commitdev/zero-aws-eks-stack).
+It also contains a simple CircleCI pipeline which defines how to build and deploy the service.
+
+### Frontend Repo
+
+The corresponding frontend for this app is [zero-deployable-react-frontend](https://github.com/commitdev/zero-deployable-react-frontend).

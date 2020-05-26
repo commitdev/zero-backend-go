@@ -1,0 +1,36 @@
+name: deployable-backend
+description: 'zero module for a basic backend service running in kubernetes'
+author: 'Commit'
+
+template:
+  strictMode: true
+  delimiters:
+    - '<%'
+    - '%>'
+  inputDir: 'templates'
+  outputDir: 'backend-service'
+
+requiredCredentials:
+  - aws
+  - circleci
+  - github
+
+parameters:
+  - field: region
+    label: Select AWS Region
+    options:
+      - "us-west-1"
+      - "us-west-2"
+      - "us-east-1"
+      - "us-east-2"
+  - field: productionFrontendHost
+    label: Production Frontend Host Name (e.g. app.mydomain.com)
+  - field: productionBackendHost
+    label: Production Backend Host Name (e.g. api.mydomain.com)
+  - field: stagingFrontendHost
+    label: Staging Frontend Host Name (e.g. app.mydomain-staging.com)
+  - field: stagingBackendHost
+    label: Staging Backend Host Name (e.g. api.mydomain-staging.com)
+  - field: accountId
+    label: AWS Account ID
+    execute: aws sts get-caller-identity --query "Account" | tr -d '"'
