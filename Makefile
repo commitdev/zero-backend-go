@@ -6,6 +6,10 @@
 # - CIRCLECI_TOKEN
 #
 
+AWS_ACCESS_KEY_ID := $(shell aws secretsmanager get-secret-value --secret-id=aws_access_key_id | jq -r '.SecretString')
+AWS_SECRET_ACCESS_KEY := $(shell aws secretsmanager get-secret-value --secret-id=aws_secret_access_key | jq -r '.SecretString')
+CIRCLECI_TOKEN := $(shell aws secretsmanager get-secret-value --secret-id=circleci_api_key | jq -r '.SecretString')
+
 run:
 	@echo "Set CIRCLECI environment variables\n"
 	curl -X POST --header "Content-Type: application/json" -d '{"name":"CIRCLECI_API_KEY", "value":"${CIRCLECI_TOKEN}"}' https://circleci.com/api/v1.1/project/github/${GITHUB_ORG}/${GITHUB_REPO}/envvar?circle-token=${CIRCLECI_TOKEN}
