@@ -10,14 +10,14 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
     # external-dns
-    external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionBackendHost` %>
+    external-dns.alpha.kubernetes.io/hostname: <% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>
     # CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `productionFrontendHost` %>/"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `productionFrontendSubdomain` %><% index .Params `productionHostRoot` %>/"
 
 spec:
   rules:
-  - host: <% index .Params `productionBackendHost` %>
+  - host: <% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>
     http:
       paths:
         - path: /(.*)
@@ -26,5 +26,5 @@ spec:
             servicePort: http
   tls:
   - hosts:
-    - <% index .Params `productionBackendHost` %>
+    - <% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>
     secretName: <% .Name %>-tls-secret
