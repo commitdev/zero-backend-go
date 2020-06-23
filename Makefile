@@ -1,6 +1,5 @@
 # The following parameters are required:
-# - GITHUB_ORG
-# - GITHUB_REPO
+# - REPOSITORY
 # - CIRCLECI_API_KEY
 #
 
