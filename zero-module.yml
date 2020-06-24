@@ -47,4 +47,4 @@ parameters:
     execute: aws sts get-caller-identity --query "Account" | tr -d '"'
   - field: randomSeed
     label: Random seed that will be shared between projects to come up with deterministic resource names
-    execute: uuidgen
+    execute: uuidgen | head -c 8
