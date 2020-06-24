@@ -2,6 +2,9 @@ name: deployable-backend
 description: 'zero module for a basic backend service running in kubernetes'
 author: 'Commit'
 
+dependsOn:
+- zero-aws-eks-stack
+
 template:
   strictMode: true
   delimiters:
