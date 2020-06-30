@@ -1,4 +1,4 @@
-name: deployable-backend
+name: zero-deployable-backend
 description: 'zero module for a basic backend service running in kubernetes'
 author: 'Commit'
 
