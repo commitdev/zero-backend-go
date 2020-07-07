@@ -22,8 +22,8 @@ metadata:
   namespace: $PROJECT_NAME
 type: Opaque
 stringData: 
-  DB_USERNAME: $DB_APP_USERNAME
-  DB_PASSWORD: $DB_APP_PASSWORD
+  DATABASE_USERNAME: $DB_APP_USERNAME
+  DATABASE_PASSWORD: $DB_APP_PASSWORD
 ---
 apiVersion: batch/v1
 kind: Job
