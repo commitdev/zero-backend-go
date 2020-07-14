@@ -283,8 +283,9 @@ workflows:
 
         - deploy:
             name: deploy_production
+            account-id: "<% index .Params `accountId` %>"
             repo: "<% .Name %>"
-            cluster-name: "<% .Name %>-staging-<% index .Params `region` %>"
+            cluster-name: "<% .Name %>-production-<% index .Params `region` %>"
             config-environment: "production"
             cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-production"
             region: "<% index .Params `region` %>"
