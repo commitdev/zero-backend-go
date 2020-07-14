@@ -16,6 +16,11 @@ stringData:
   RDS_MASTER_PASSWORD: $SECRET_PASSWORD
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: $PROJECT_NAME
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: $PROJECT_NAME
