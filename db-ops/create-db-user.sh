@@ -22,7 +22,7 @@ eval "echo \"$(cat ./db-ops/job-create-db.yml.tpl)\"" > ./k8s-job-create-db.yml
 kubectl create -f ./k8s-job-create-db.yml
 
 # Deleting the entire db-ops namespace, leaving ONLY application-namespace's secret behind
-kubectl wait --for=condition=complete --timeout=10s job db-create-users
+kubectl -n db-ops wait --for=condition=complete --timeout=10s job db-create-users
 if [ $? -eq 0 ]
 then 
   kubectl delete namespace db-ops
