@@ -5,13 +5,13 @@
 ### Requirements
 
 Requires you to configure the below [CircleCI Environment Variables](https://circleci.com/docs/2.0/env-vars/):
-
+```yml
 - AWS_ACCESS_KEY_ID         # AWS access key for the circleci user - this should be in AWS secret manager
 - AWS_SECRET_ACCESS_KEY     # AWS secret for the circleci user - this should be in AWS secret manager
 - CIRCLECI_API_KEY          # Needed for the queueing orb. You can generate this in the project settings in CircleCI. It needs the `status` scope.
 
 - SLACK_WEBHOOK             # Webhook for slack notifications. Must only be specified if you uncomment `slack/notify-on-failure`
-
+```
 
 ## Deployment Process
 
