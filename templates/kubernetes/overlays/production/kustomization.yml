@@ -14,5 +14,5 @@ configMapGenerator:
   behavior: merge
   literals:
     - DATABASE_HOST=<% index .Params `productionDatabaseHostname` %>
-    - DATABASE_NAME=<% .Name %>_production
+    - DATABASE_NAME=<% .Name %>_prod
     - ENVIRONMENT=production

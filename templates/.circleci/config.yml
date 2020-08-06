@@ -262,9 +262,9 @@ workflows:
             name: deploy_staging
             account-id: "<% index .Params `accountId` %>"
             repo: "<% .Name %>"
-            cluster-name: "<% .Name %>-staging-<% index .Params `region` %>"
+            cluster-name: "<% .Name %>-stage-<% index .Params `region` %>"
             config-environment: "staging"
-            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-staging"
+            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-stage"
             region: "<% index .Params `region` %>"
             namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
@@ -285,9 +285,9 @@ workflows:
             name: deploy_production
             account-id: "<% index .Params `accountId` %>"
             repo: "<% .Name %>"
-            cluster-name: "<% .Name %>-production-<% index .Params `region` %>"
+            cluster-name: "<% .Name %>-prod-<% index .Params `region` %>"
             config-environment: "production"
-            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-production"
+            cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-admin-prod"
             region: "<% index .Params `region` %>"
             namespace: "<% .Name %>"
             tag: "${VERSION_TAG}"
