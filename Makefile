@@ -28,5 +28,5 @@ summary:
 	@echo "zero-deployable-backend:"
 	@echo "- Repository URL: ${REPOSITORY}"
 	@echo "- Deployment Pipeline URL: https://app.circleci.com/pipelines/github/${GITHUB_ORG}/${GITHUB_REPO}"
-	@echo $(shell echo ${ENVIRONMENT} | grep production > /dev/null && echo "- Production API: ${productionBackendSubdomain}${productionHostRoot}")
-	@echo $(shell echo ${ENVIRONMENT} | grep staging > /dev/null && echo "- Staging API: ${stagingBackendSubdomain}${stagingHostRoot}")
+	@echo $(shell echo ${ENVIRONMENT} | grep prod > /dev/null && echo "- Production API: ${productionBackendSubdomain}${productionHostRoot}")
+	@echo $(shell echo ${ENVIRONMENT} | grep stage > /dev/null && echo "- Staging API: ${stagingBackendSubdomain}${stagingHostRoot}")

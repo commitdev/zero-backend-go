@@ -13,5 +13,5 @@ configMapGenerator:
   behavior: merge
   literals:
     - DATABASE_HOST=<% index .Params `stagingDatabaseHostname` %>
-    - DATABASE_NAME=<% .Name %>-staging
+    - DATABASE_NAME=<% .Name %>-stage
     - ENVIRONMENT=staging
