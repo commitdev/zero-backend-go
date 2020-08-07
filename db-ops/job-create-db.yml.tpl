@@ -12,7 +12,7 @@ type: Opaque
 stringData: 
   create-user.sql: |
     create user $DB_APP_USERNAME with encrypted password '$DB_APP_PASSWORD';
-    grant all privileges on database $PROJECT_NAME to $DB_APP_USERNAME;
+    grant all privileges on database $DB_NAME to $DB_APP_USERNAME;
   RDS_MASTER_PASSWORD: $SECRET_PASSWORD
 ---
 apiVersion: v1
@@ -45,7 +45,7 @@ spec:
         - sh
         args: 
         - '-c' 
-        - psql -U$MASTER_RDS_USERNAME -h $DB_ENDPOINT $PROJECT_NAME -a -f/db-ops/create-user.sql > /dev/null
+        - psql -U$MASTER_RDS_USERNAME -h $DB_ENDPOINT $DB_NAME -a -f/db-ops/create-user.sql > /dev/null
         env:
         - name: PGPASSWORD
           valueFrom:
@@ -62,3 +62,36 @@ spec:
             secretName: db-create-users
       restartPolicy: Never
   backoffLimit: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-pod
+  namespace: $PROJECT_NAME
+spec:
+# this is purposely left at 0 so it can be enabled for troubleshooting purposes
+  replicas: 0
+  selector:
+    matchLabels:
+      app: db-pod
+  template:
+    metadata:
+      labels:
+        app: db-pod
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - tail
+        - -f
+        - /dev/null
+        image: governmentpaas/psql:latest
+        imagePullPolicy: Always
+        name: db-pod
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: $PROJECT_NAME
+              key: DATABASE_PASSWORD
+
