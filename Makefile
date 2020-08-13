@@ -22,6 +22,7 @@ create-db-user:
 	export SEED=${randomSeed}; \
 	export PROJECT_NAME=${PROJECT_NAME}; \
 	export ENVIRONMENT=${ENVIRONMENT}; \
+	export DATABASE=${database}; \
 	sh ./db-ops/create-db-user.sh
 
 summary:
