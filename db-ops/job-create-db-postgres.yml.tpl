@@ -82,16 +82,21 @@ spec:
       automountServiceAccountToken: false
       containers:
       - command:
-        - tail
-        - -f
-        - /dev/null
-        image: governmentpaas/psql:latest
+        - sh
+        args: 
+        - "-c"
+        # long running task so the pod doesn't exit with 0
+        - tail -f /dev/null
+        image: $DOCKER_IMAGE_TAG
         imagePullPolicy: Always
         name: db-pod
         env:
-        - name: PGPASSWORD
+        - name: DB_ENDPOINT
+          value: $DB_ENDPOINT
+        - name: DB_NAME
+          value: $DB_NAME
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: $PROJECT_NAME
               key: DATABASE_PASSWORD
-

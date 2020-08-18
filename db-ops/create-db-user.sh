@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# docker image with postgres client only
-DOCKER_IMAGE_TAG=governmentpaas/psql:latest
-
+# docker image with postgres.mysql client only
+# TODO: use image from commit org
+DOCKER_IMAGE_TAG=davidcheung/database-clients:0.1
 DB_ENDPOINT=database.$PROJECT_NAME
 DB_NAME=$(aws rds describe-db-instances --region=$REGION --query "DBInstances[?DBInstanceIdentifier=='$PROJECT_NAME-$ENVIRONMENT'].DBName" | jq -r '.[0]')
 SECRET_ID=$(aws secretsmanager list-secrets --region $REGION  --query "SecretList[?Name=='$PROJECT_NAME-$ENVIRONMENT-rds-$SEED'].Name" | jq -r ".[0]")
@@ -14,7 +14,7 @@ DB_APP_USERNAME=$DB_NAME
 DB_APP_PASSWORD=$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | base64 | head -c 16)
 
 # Fill in env-vars to db user creation manifest
-eval "echo \"$(cat ./db-ops/job-create-db.yml.tpl)\"" > ./k8s-job-create-db.yml
+eval "echo \"$(cat ./db-ops/job-create-db-$DATABASE.yml.tpl)\"" > ./k8s-job-create-db.yml
 # the manifest creates 4 things
 # 1. Namespace: db-ops 
 # 2. Secret in db-ops: db-create-users (with master password, and a .sql file
