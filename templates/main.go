@@ -12,12 +12,18 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"<% .Files.Repository %>/database"
 )
 
 const gracefulShutdownTimeout = 10 * time.Second
 
 func main() {
 	go heartbeat()
+
+	// start database connection and run a query
+	db := database.Connect()
+	db.TestConnection()
 
 	r := http.NewServeMux()
 	r.HandleFunc("/status/ready", readinessCheckEndpoint)

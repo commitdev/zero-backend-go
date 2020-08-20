@@ -95,6 +95,11 @@ spec:
           value: $DB_ENDPOINT
         - name: DB_NAME
           value: $DB_NAME
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: $PROJECT_NAME
+              key: DATABASE_USERNAME
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
