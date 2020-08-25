@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # docker image with postgres.mysql client only
-# TODO: use image from commit org
-DOCKER_IMAGE_TAG=davidcheung/database-clients:0.1
+DOCKER_IMAGE_TAG=commitdev/zero-k8s-utilities:mysql-postgres
 DB_ENDPOINT=database.$PROJECT_NAME
 DB_NAME=$(aws rds describe-db-instances --region=$REGION --query "DBInstances[?DBInstanceIdentifier=='$PROJECT_NAME-$ENVIRONMENT'].DBName" | jq -r '.[0]')
 SECRET_ID=$(aws secretsmanager list-secrets --region $REGION  --query "SecretList[?Name=='$PROJECT_NAME-$ENVIRONMENT-rds-$SEED'].Name" | jq -r ".[0]")

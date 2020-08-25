@@ -96,3 +96,6 @@ $RECYCLE.BIN/
 
 # CircleCI
 .circleci/config-compiled.yml
+
+# application environment config
+.env
