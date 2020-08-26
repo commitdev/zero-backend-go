@@ -29,22 +29,22 @@ func getConnectionStringTemplate(engine string) string {
 }
 
 func getConnectionString() string {
+	//loading env from .env
 	godotenv.Load()
-	env, _ = godotenv.Read()
 
 	connectionString := fmt.Sprintf(
-		getConnectionStringTemplate(env["DB_ENGINE"]),
-		env["DB_USERNAME"],
-		env["DB_PASSWORD"],
-		env["DB_HOST"],
-		env["DB_PORT"],
-		env["DB_DATABASE"],
+		getConnectionStringTemplate(os.Getenv("DATABASE_ENGINE")),
+		os.Getenv("DATABASE_USERNAME"),
+		os.Getenv("DATABASE_PASSWORD"),
+		os.Getenv("DATABASE_HOST"),
+		os.Getenv("DATABASE_PORT"),
+		os.Getenv("DATABASE_NAME"),
 	)
 	return connectionString
 }
 
 func Connect() *Database {
-	db, err := gorm.Open(env["DB_ENGINE"], getConnectionString())
+	db, err := gorm.Open(os.Getenv("DATABASE_ENGINE"), getConnectionString())
 
 	if err != nil {
 		fmt.Println(err)
