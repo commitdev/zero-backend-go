@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - deployment.yml
 - service.yml
+- cronjob.yml
 
 configMapGenerator:
 - name: <% .Name %>-config

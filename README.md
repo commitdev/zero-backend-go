@@ -4,14 +4,14 @@ service which can be deployed to the environment set up with [zero-aws-eks-stack
 
 The `/templates` folder is meant to be filled in via [Zero][zero] and results in Simple Go Service with a status endpoint. It also contains a simple CircleCI pipeline which defines how to build and deploy the service.
 
-This repository is language/business-logic agnostic; mainly showcasing some universal best practices: 
+This repository is language/business-logic agnostic; mainly showcasing some universal best practices:
 - Built in containerization with docker
 - Deployment flow with kubernetes
-- Out of the box CI/CD flow CircleCi 
+- Out of the box CI/CD flow CircleCi
   - testing
   - building docker image
   - uploading docker image to private registry (ECR)
-  - deploy with kustomize 
+  - deploy with kustomize
   - manual approval step for production environment
 
 
@@ -29,11 +29,12 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |   |   # on-going needs/utilities for user to maintain their infrastructure
 |   |-- Makefile
 |   |-- kubernetes/
-|       |-- base/              
+|       |-- base/
+|       |   |-- cronjob.yml
 |       |   |-- deployment.yml
 |       |   |-- kustomization.yml
 |       |   |-- service.yml
-|       |-- overlays/          
+|       |-- overlays/
 |       |   |-- production/
 |       |   |   |-- deployment.yml
 |       |   |   |-- ingress.yml
@@ -44,7 +45,7 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |       |   |   |-- ingress.yml
 |       |   |   |-- kustomization.yml
 |       |   |   |-- pdb.yml
-|       |-- secrets/           
+|       |-- secrets/
 |       |   |-- .gitignore
 |       |   |-- kustomization.yml
 |       |   |-- namespace.yml
@@ -58,7 +59,7 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 
 ## Initialization
 This step is meant to be executed during `zero apply`, includes following steps:
-- Adding environment variables to CircleCI project 
+- Adding environment variables to CircleCI project
 - Linking the CircleCi with the github repository
   - Linking the circleCI will automatically trigger the first build and deploy your application to EKS cluster
 - Creating the application database's credentials
@@ -71,7 +72,7 @@ Using environment variables injected from Zero, it will fetch the RDS master pas
 - creating a secret in the application namespace in your EKS cluster
 - removing the RDS master password for security reasons
 
-_Note: the user creation only happens once during `zero apply`, for details see the `make create-db-user` command_ 
+_Note: the user creation only happens once during `zero apply`, for details see the `make create-db-user` command_
 
 ### Frontend Repo
 
