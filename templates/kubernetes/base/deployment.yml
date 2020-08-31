@@ -9,6 +9,8 @@ spec:
       app: <% .Name %>
   template:
     spec:
+      serviceAccountName: backend-service
+      automountServiceAccountToken: true
       containers:
         - name: <% .Name %>
           image: fake-image
