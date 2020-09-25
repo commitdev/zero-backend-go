@@ -231,11 +231,23 @@ jobs:
       - run:
           name: Deploy
           command: |
-            kubectl create namespace << parameters.namespace >> || echo "Namespace already exists"
+            DEPLOYMENT=<< parameters.repo >>
+            NAMESPACE=<< parameters.namespace >>
+            kubectl create namespace $NAMESPACE || echo "Namespace already exists"
             cd kubernetes/overlays/<< parameters.config-environment >>
             IMAGE=<< parameters.account-id >>.dkr.ecr.<< parameters.region >>.amazonaws.com/<< parameters.repo >>
             kustomize edit set image fake-image=${IMAGE}:${VERSION_TAG}
-            kustomize build . | kubectl apply -f - -n << parameters.namespace >>
+            kustomize build . | kubectl apply -f - -n $NAMESPACE
+            if ! kubectl -n $NAMESPACE rollout status deployment/$DEPLOYMENT -w --timeout=180s ; then
+              echo "$DEPLOYMENT rollout check failed:"
+              echo "$DEPLOYMENT deployment:"
+              kubectl -n $NAMESPACE describe deployment $DEPLOYMENT
+              echo "$DEPLOYMENT replicaset:"
+              kubectl -n $NAMESPACE describe rs -l app=$DEPLOYMENT
+              echo "$DEPLOYMENT pods:"
+              kubectl -n $NAMESPACE describe pod -l app=$DEPLOYMENT
+              exit 1
+            fi
 workflows:
     version: 2
     # The main workflow. Check out the code, build it, push it, deploy to staging, test, deploy to production
