@@ -5,7 +5,7 @@ orbs:
   aws-eks: circleci/aws-eks@0.2.3
   aws-s3: circleci/aws-s3@1.0.11
   aws-cli: circleci/aws-cli@0.1.18
-  queue: eddiewebb/queue@1.3.0
+  queue: eddiewebb/queue@1.5.0
   slack: circleci/slack@3.4.2
   version-tag: commitdev/version-tag@0.0.3
 
