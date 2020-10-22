@@ -23,10 +23,10 @@ eval "echo \"$(cat ./db-ops/job-create-db-$DATABASE.yml.tpl)\"" > ./k8s-job-crea
 kubectl apply -f ./k8s-job-create-db.yml
 
 # Deleting the entire db-ops namespace, leaving ONLY application-namespace's secret behind
-kubectl -n db-ops wait --for=condition=complete --timeout=10s job db-create-users
+kubectl -n db-ops wait --for=condition=complete --timeout=10s job db-create-users-${JOB_ID}
 if [ $? -eq 0 ]
 then 
-  kubectl get namespace db-ops
+  kubectl delete namespace db-ops
 else 
-  echo "Failed to create application database user, please see 'kubectl logs -n db-ops -l job-name=db-create-users'"
+  echo "Failed to create application database user, please see 'kubectl logs -n db-ops -l job-name=db-create-users-${JOB_ID}'"
 fi
