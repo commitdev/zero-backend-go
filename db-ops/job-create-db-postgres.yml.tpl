@@ -11,6 +11,7 @@ metadata:
 type: Opaque
 stringData: 
   create-user.sql: |
+    drop user $DB_APP_USERNAME
     create user $DB_APP_USERNAME with encrypted password '$DB_APP_PASSWORD';
     grant all privileges on database $DB_NAME to $DB_APP_USERNAME;
   RDS_MASTER_PASSWORD: $SECRET_PASSWORD
@@ -33,7 +34,7 @@ stringData:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: db-create-users
+  name: db-create-users-$JOB_ID
   namespace: db-ops
 spec:
   template:
