@@ -20,9 +20,6 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 /   # file in the root directory is for initializing the user's repo and declaring metadata
 |-- Makefile                        #make command triggers the initialization of repository
 |-- zero-module.yml                 #module declares required parameters and credentials
-|   db-ops/
-|   |-- create-db-user.sh
-|   |-- job-create-db.yml.tpl
 |   # files in templates become the repo for users
 |   templates/
 |   |   # this makefile is used both during init and
@@ -62,17 +59,7 @@ This step is meant to be executed during `zero apply`, includes following steps:
 - Adding environment variables to CircleCI project
 - Linking the CircleCi with the github repository
   - Linking the circleCI will automatically trigger the first build and deploy your application to EKS cluster
-- Creating the application database's credentials
 
-
-### Application Database user creation
-Using environment variables injected from Zero, it will fetch the RDS master password from AWS secret manager
-- creates a namespace
-- creates a job with a SQL query file mounted generating an application user
-- creating a secret in the application namespace in your EKS cluster
-- removing the RDS master password for security reasons
-
-_Note: the user creation only happens once during `zero apply`, for details see the `make create-db-user` command_
 
 ### Frontend Repo
 
