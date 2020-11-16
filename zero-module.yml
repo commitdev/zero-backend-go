@@ -78,3 +78,18 @@ parameters:
     execute: uuidgen | head -c 8
   - field: databaseName
     execute: echo "$projectName"| sed "s/[- ]//g"
+  - field: userAuth
+    label: Enable user management using Kratos and authentication using the Oathkeeper access proxy?
+    default: yes
+    options:
+      - "yes"
+      - "no"
+conditions:
+  - action: ignoreFile
+    matchField: userAuth
+    whenValue: "no"
+    data:
+    - auth
+    - kubernetes/base/auth.yml
+    - kubernetes/overlays/staging/auth.yml
+    - kubernetes/overlays/production/auth.yml

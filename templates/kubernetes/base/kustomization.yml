@@ -5,7 +5,8 @@ resources:
 - deployment.yml
 - service.yml
 - cronjob.yml
-
+<%if eq (index .Params `userAuth`) "yes" %>- auth.yml
+<% end %>
 configMapGenerator:
 - name: <% .Name %>-config
   literals:
