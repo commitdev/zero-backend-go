@@ -6,26 +6,28 @@ import (
 	"net/http"
 )
 
-func getUserInfoFromHeaders(r *http.Request) (error, string, string) {
+type UserInfo struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+}
+
+func GetUserInfoFromHeaders(r *http.Request) (error, UserInfo) {
 	userId := r.Header.Get("x-user-id")
 	userEmail := r.Header.Get("x-user-email")
 
 	if userId == "" || userEmail == "" {
-		return errors.New("Unauthenticated"), "", ""
+		return errors.New("Unauthenticated"), UserInfo{}
 	}
-	return nil, userId, userEmail
+	return nil, UserInfo{userId, userEmail}
 }
 
-func UserInfo(w http.ResponseWriter, r *http.Request) {
-	authErr, userId, userEmail := getUserInfoFromHeaders(r)
+func GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	authErr, userInfo := GetUserInfoFromHeaders(r)
 	if authErr != nil {
 		http.Error(w, authErr.Error(), http.StatusUnauthorized)
 		return
 	} else {
-		response, err := json.Marshal(map[string]string{
-			"id":    userId,
-			"email": userEmail,
-		})
+		response, err := json.Marshal(userInfo)
 		if err == nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(response)
