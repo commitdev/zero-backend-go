@@ -3,10 +3,13 @@ kind: Kustomization
 
 patchesStrategicMerge:
 - deployment.yml
-
+<%if eq (index .Params `userAuth`) "yes" %>- auth.yml
+<% end %>
 resources:
 - ../../base
-- ingress.yml
+<%if eq (index .Params `userAuth`) "yes" %>## userAuth enabled - Oathkeeper proxies to backend instead of ingress
+# - ingress.yml
+<% else %>- ingress.yml<% end %>
 - pdb.yml
 
 configMapGenerator:

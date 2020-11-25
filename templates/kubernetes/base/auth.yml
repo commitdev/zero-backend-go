@@ -1,0 +1,49 @@
+## Backend public endpoint
+# pattern: http://<proxy>/status
+# In example this is serves the infoPanel data, and the status endpoints that don't require user auth
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: public-backend-endpoints
+spec:
+  upstream:
+    url: http://<% .Name %>.<% .Name %>
+    preserveHost: true
+  match:
+    # url: http://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>/status/<.*>
+    methods:
+      - GET
+      - POST
+  authenticators:
+    - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: noop
+---
+## Backend User-restricted endpoint
+# pattern: http://<proxy>/<not `status`/`.ory/kratos`>, everything else should be authenticated
+# In example this is serves the /userInfo endpoint returning the user-session's info (user_id / email)
+# Note the authenticators is `cookie_session`,
+# oathkeeper will verify the validity of session then pass along user-id/email in the Request Header
+# these can be configured via infra's `oathkeeper-values.yml`
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: authenticated-backend-endpoints
+spec:
+  upstream:
+    preserveHost: true
+    url: http://<% .Name %>.<% .Name %>
+  match:
+    # url: <backend_service_domain>/<(?!(status|\.ory\/kratos)).*>
+    methods:
+      - GET
+      - POST
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: id_token
+    - handler: header

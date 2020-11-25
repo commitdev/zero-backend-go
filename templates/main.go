@@ -14,7 +14,8 @@ import (
 	"time"
 
 	"<% .Files.Repository %>/database"
-)
+<%if eq (index .Params `userAuth`) "yes" %>	"<% .Files.Repository %>/internal/auth"
+<% end %>)
 
 const gracefulShutdownTimeout = 10 * time.Second
 
@@ -39,7 +40,9 @@ func main() {
 		}
 	})
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+<%if eq (index .Params `userAuth`) "yes" %>	r.HandleFunc("/auth/userInfo", auth.GetUserInfo)
+
+<% end %>	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
