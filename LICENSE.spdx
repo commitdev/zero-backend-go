@@ -1,0 +1,6 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+PackageName: zero-deployable-go-backend
+PackageOriginator: Commit
+PackageHomePage: https://github.com/commitdev/zero-deployable-backend/
+PackageLicenseDeclared: Apache-2.0
