@@ -90,7 +90,7 @@ kubectl --context ${CLUSTER_CONTEXT} get sa ${SERVICE_ACCOUNT} -n ${DEV_NAMESPAC
     kubectl --context ${CLUSTER_CONTEXT} get sa ${SERVICE_ACCOUNT} -n ${NAMESPACE} -o json | jq 'del(.metadata["namespace","creationTimestamp","resourceVersion","selfLink","uid"])' | kubectl --context ${CLUSTER_CONTEXT} apply -n ${DEV_NAMESPACE} -f -
 
 # Setup dev k8s manifests, configuration, docker login etc
-CONFIG_ENVIRONMENT="staging"
+CONFIG_ENVIRONMENT="devenv"
 EXT_HOSTNAME=<% index .Params `stagingBackendSubdomain`  %><% index .Params `stagingHostRoot` %>
 MY_EXT_HOSTNAME=${DEV_NAMESPACE}-${EXT_HOSTNAME}
 ECR_REPO=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${PROJECT_NAME}
@@ -119,6 +119,18 @@ if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} rollout status dep
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe pod -l app=${PROJECT_NAME}
     error_exit "Failed deployment. Leaving namespace ${DEV_NAMESPACE} for debugging"
 fi
+
+# Verify until the ingress DNS gets ready
+while ! nslookup ${MY_EXT_HOSTNAME} 8.8.8.8 >& /dev/null; do echo "waiting for domain '${MY_EXT_HOSTNAME}' to get resolved..."; sleep 5; done
+
+# Starting telepresence shell
+echo
+echo "Now you are ready to access your service at:"
+echo
+echo "  https://${MY_EXT_HOSTNAME}"
+echo
+echo -n "You will get into dev environment shell which will proxy all the requests and environment variables from cluster to the local shell. Be noticied that the above URL access will get 502 bad gateway error until you launch the service by 'make run' in the shell. Press any key to continue ..." && read
+echo
 
 # Starting dev environment with telepresence shell
 echo
