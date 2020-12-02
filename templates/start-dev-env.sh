@@ -36,13 +36,16 @@ function can_i() {
     done
 
     [[ $err -gt 0  ]] && error_exit "Found $err permission errors. Please check with your administrator."
+
+    echo "Permission checks: passed"
+    return 0
 }
 
 # Start
 # Validate current iam user
 MY_USERNAME=$(aws sts get-caller-identity --output json | jq -r .Arn | cut -d/ -f2)
 DEV_USERS=$(aws iam get-group --group-name ${PROJECT_NAME}-developer-${ENVIRONMENT} | jq -r .Users[].UserName)
-[[ "${DEV_USERS[@]}" =~ "${MY_USERNAME}" ]] || error_exit "You (${MY_USERNAME}) are not in ${DEV_USERS}"
+[[ "${DEV_USERS[@]}" =~ "${MY_USERNAME}" ]] || error_exit "You (${MY_USERNAME}) are not in the ${PROJECT_NAME}-developer-${ENVIRONMENT} IAM group."
 
 DEV_PROJECT_ID=${1:-"001"}
 
@@ -98,16 +101,28 @@ echo "  Domain: ${MY_EXT_HOSTNAME}"
 echo "  Database Name: ${DEV_DATABASE_NAME}"
 
 # Apply manifests
-(cd kubenetes/overlay/${CONFIG_ENVIRONMENT} && \
+(cd kubernetes/overlays/${CONFIG_ENVIRONMENT} && \
     kustomize build . | \
     sed "s|image: fake-image|image: ${ECR_REPO}:${VERSION_TAG}|g" | \
     sed "s|${EXT_HOSTNAME}|${MY_EXT_HOSTNAME}|g" | \
-    sed "s|DATABASE_NAME=${DATABASE_NAME}|DATABASE_NAME=${DEV_DATABASE_NAME}|g" | \
-    kubectl --context ${} -n ${DEV_NAMESPACE} apply -f - ) || error_exit "Failed to apply kubernetes manifests"
+    sed "s|DATABASE_NAME: ${DATABASE_NAME}|DATABASE_NAME: ${DEV_DATABASE_NAME}|g" | \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} apply -f - ) || error_exit "Failed to apply kubernetes manifests"
+
+# Confirm deployment
+if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} rollout status deployment/${PROJECT_NAME} -w --timeout=180s ; then
+    echo "${PROJECT_NAME} rollout check failed:"
+    echo "${PROJECT_NAME} deployment:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe deployment ${PROJECT_NAME}
+    echo "${PROJECT_NAME} replicaset:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe rs -l app=${PROJECT_NAME}
+    echo "${PROJECT_NAME} pods:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe pod -l app=${PROJECT_NAME}
+    error_exit "Failed deployment. Leaving namespace ${DEV_NAMESPACE} for debugging"
+fi
 
 # Starting dev environment with telepresence shell
 echo
-telepresence --swap-deployment ${PROJECT_NAME} --namespace ${DEV_NAMESPACE} --expose 80 --run-shell
+telepresence --context ${CLUSTER_CONTEXT} --swap-deployment ${PROJECT_NAME} --namespace ${DEV_NAMESPACE} --expose 80 --run-shell
 
 # Ending dev environment
 echo

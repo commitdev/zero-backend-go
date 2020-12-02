@@ -12,6 +12,22 @@ kubectl -n <% .Name %> get pods
 ### Configuring
 You can update the resource limits in the [kubernetes/base/deployment.yml][base-deployment], and control fine-grain customizations based on environment and specific deployments such as Scaling out your production replicas from the [overlays configurations][env-prod]
 
+### Dev Environment
+You can do fast local development of a single service, even if that service depends on other services in your cluster. Make a change to your service, save, and you can immediately see the new service in action. And, you can use any tools like IDE installed locally to test/debug/edit your service.
+
+Supposing your backend service (`<% .Name %>`, a web service, output `Hello`) is running on Staging cluster, you can `curl htts://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>` and see `Hello`. Now, you want to change the service and verify it locally.
+
+Usually, you will test the service in local that accesses your local database. However, today, you need access data on Staging database and you are not allowed to access that database directly from your local machine.
+
+- Regular development workflow:
+  a. change code --> b. lite test on local --> c. git commit & auto-deploy to Staging --> d. verify the changes on Staging --> e. repeat a~d until done
+
+- New development workflow:
+  a. run `start-dev-env.sh` --> b. change code --> c. test on Staging with cloud DB --> d. repeat b~c until done --> e. git commit & auto-deploy to Staging
+
+Note: this script is powered by Telepresence (http://telepresence.io) and Kustomize. You may customize the script.
+
+
 ## Circle CI
 Your repository comes with a end-to-end CI/CD pipeline, which includes the following steps:
 1. Checkout
