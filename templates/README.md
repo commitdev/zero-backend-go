@@ -13,19 +13,19 @@ kubectl -n <% .Name %> get pods
 You can update the resource limits in the [kubernetes/base/deployment.yml][base-deployment], and control fine-grain customizations based on environment and specific deployments such as Scaling out your production replicas from the [overlays configurations][env-prod]
 
 ### Dev Environment
-You can do fast local development of a single service, even if that service depends on other services in your cluster. Make a change to your service, save, and you can immediately see the new service in action. And, you can use any tools like IDE installed locally to test/debug/edit your service.
+This project is set up with a local/cloud hybrid dev environment. This means you can do fast local development of a single service, even if that service depends on other resources in your cluster. 
+Make a change to your service, run it, and you can immediately see the new service in action in a real environment. You can also use any tools like your local IDE, debugger, etc. to test/debug/edit/run your service.
 
-Supposing your backend service (`<% .Name %>`, a web service, output `Hello`) is running on Staging cluster, you can `curl htts://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>` and see `Hello`. Now, you want to change the service and verify it locally.
+Usually when developing you would run the service locally with a local database and any other dependencies running either locally or in containers using `docker-compose`, `minikube`, etc. 
+Now your service will have access to any dependencies within a namespace running in the EKS cluster, with access to resources there.
+[Telepresence](https://telepresence.io) is used to provide this functionality. 
 
-Usually, you will test the service in local that accesses your local database. However, today, you need access data on Staging database and you are not allowed to access that database directly from your local machine.
-
-- Regular development workflow:
-  a. change code --> b. lite test on local --> c. git commit & auto-deploy to Staging --> d. verify the changes on Staging --> e. repeat a~d until done
-
-- New development workflow:
-  a. run `start-dev-env.sh` --> b. change code --> c. test on Staging with cloud DB --> d. repeat b~c until done --> e. git commit & auto-deploy to Staging
-
-Note: this script is powered by Telepresence (http://telepresence.io) and Kustomize. You may customize the script.
+ Development workflow:
+ 
+  1. Run `start-dev-env.sh` - You will be dropped into a shell that is the same as your local machine, but works as if it were running inside a pod in your k8s cluster
+  2. Change code and run the server - As you run your local server, using local code, it will have access to remote dependencies, and will be sent traffic by the load balancer
+  3. Test on your cloud environment with real dependencies - `https://<your name>-<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>`
+  4. git commit & auto-deploy to Staging through the build pipeline
 
 
 ## Circle CI
