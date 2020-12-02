@@ -166,7 +166,7 @@ jobs:
             echo 'export AWS_ECR_ACCOUNT_URL=<< parameters.account-id >>.dkr.ecr.<< parameters.region >>.amazonaws.com' >> $BASH_ENV
       - aws-ecr/build-and-push-image:
           repo: << parameters.repo >>
-          tag: $VERSION_TAG,latest
+          tag: $VERSION_TAG,latest,last-deployed
 
   deploy:
     executor: aws-eks/python3

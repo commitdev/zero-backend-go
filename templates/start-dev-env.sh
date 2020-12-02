@@ -47,7 +47,7 @@ MY_USERNAME=$(aws sts get-caller-identity --output json | jq -r .Arn | cut -d/ -
 DEV_USERS=$(aws iam get-group --group-name ${PROJECT_NAME}-developer-${ENVIRONMENT} | jq -r .Users[].UserName)
 [[ "${DEV_USERS[@]}" =~ "${MY_USERNAME}" ]] || error_exit "You (${MY_USERNAME}) are not in the ${PROJECT_NAME}-developer-${ENVIRONMENT} IAM group."
 
-DEV_PROJECT_ID=${1:-"001"}
+DEV_PROJECT_ID=${1:-""}
 
 echo '[Dev Environment]'
 
@@ -73,7 +73,7 @@ if ! command_exist kustomize || ! command_exist telepresence; then
 fi
 
 # Setup dev namepsace
-DEV_NAMESPACE=${MY_USERNAME}-${DEV_PROJECT_ID}
+DEV_NAMESPACE=${MY_USERNAME}${DEV_PROJECT_ID}
 kubectl --context ${CLUSTER_CONTEXT} get namespace ${DEV_NAMESPACE} >& /dev/null || \
     (can_i "create namespace,create deployment,create ingress,create service,create secret,create configmap" && \
     kubectl --context ${CLUSTER_CONTEXT} create namespace ${DEV_NAMESPACE})
@@ -103,7 +103,6 @@ echo "  Database Name: ${DEV_DATABASE_NAME}"
 # Apply manifests
 (cd kubernetes/overlays/${CONFIG_ENVIRONMENT} && \
     kustomize build . | \
-    sed "s|image: fake-image|image: ${ECR_REPO}:${VERSION_TAG}|g" | \
     sed "s|${EXT_HOSTNAME}|${MY_EXT_HOSTNAME}|g" | \
     sed "s|DATABASE_NAME: ${DATABASE_NAME}|DATABASE_NAME: ${DEV_DATABASE_NAME}|g" | \
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} apply -f - ) || error_exit "Failed to apply kubernetes manifests"
@@ -121,7 +120,9 @@ if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} rollout status dep
 fi
 
 # Verify until the ingress DNS gets ready
-while ! nslookup ${MY_EXT_HOSTNAME} 8.8.8.8 >& /dev/null; do echo "waiting for domain '${MY_EXT_HOSTNAME}' to get resolved..."; sleep 5; done
+bash -c "while ! nslookup ${MY_EXT_HOSTNAME} >& /dev/null; do sleep 30; done; echo && echo \"Notice: your domain ${MY_EXT_HOSTNAME} gets propagated.\";" &
+sleep 2
+echo
 
 # Starting telepresence shell
 echo
