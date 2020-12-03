@@ -90,7 +90,7 @@ kubectl --context ${CLUSTER_CONTEXT} get sa ${SERVICE_ACCOUNT} -n ${DEV_NAMESPAC
     kubectl --context ${CLUSTER_CONTEXT} get sa ${SERVICE_ACCOUNT} -n ${NAMESPACE} -o json | jq 'del(.metadata["namespace","creationTimestamp","resourceVersion","selfLink","uid"])' | kubectl --context ${CLUSTER_CONTEXT} apply -n ${DEV_NAMESPACE} -f -
 
 # Setup dev k8s manifests, configuration, docker login etc
-CONFIG_ENVIRONMENT="devenv"
+CONFIG_ENVIRONMENT="dev"
 EXT_HOSTNAME=<% index .Params `stagingBackendSubdomain`  %><% index .Params `stagingHostRoot` %>
 MY_EXT_HOSTNAME=${DEV_NAMESPACE}-${EXT_HOSTNAME}
 ECR_REPO=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${PROJECT_NAME}
@@ -120,14 +120,13 @@ if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} rollout status dep
 fi
 
 # Verify until the ingress DNS gets ready
-if nslookup ${MY_EXT_HOSTNAME}x >& /dev/null; then
+echo
+if nslookup ${MY_EXT_HOSTNAME} >& /dev/null; then
     echo "  Notice: your domain is ready to use."
 else
     echo "  Notice: the first time you use this environment it may take up to 5 minutes for DNS to propagate before the hostname is available."
     bash -c "while ! nslookup ${MY_EXT_HOSTNAME} >& /dev/null; do sleep 30; done; echo && echo \"  Notice: your domain ${MY_EXT_HOSTNAME} is ready to use.\";" &
 fi
-sleep 2
-echo
 
 # Starting telepresence shell
 echo
