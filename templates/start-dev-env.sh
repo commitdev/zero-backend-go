@@ -134,7 +134,7 @@ echo "Now you are ready to access your service at:"
 echo
 echo "  https://${MY_EXT_HOSTNAME}"
 echo
-echo -n "You will get into dev environment shell which will proxy all the requests and environment variables from cluster to the local shell. Be noticied that the above URL access will get 502 bad gateway error until you launch the service by 'make run' in the shell. Press any key to continue ..." && read
+echo -n "Your telepresence dev environment is now loading which will proxy all the requests and environment variables from the cloud EKS cluster to the local shell.\nNote that the above URL access will get a \"502 Bad Gateway\" error until you launch the service in the shell, at which point it will start receiving traffic."
 echo
 
 # Starting dev environment with telepresence shell
