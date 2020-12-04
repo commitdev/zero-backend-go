@@ -42,6 +42,11 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |       |   |   |-- ingress.yml
 |       |   |   |-- kustomization.yml
 |       |   |   |-- pdb.yml
+|       |   |-- dev/
+|       |   |   |-- deployment.yml
+|       |   |   |-- ingress.yml
+|       |   |   |-- kustomization.yml
+|       |   |   |-- pdb.yml
 |       |-- secrets/
 |       |   |-- .gitignore
 |       |   |-- kustomization.yml
