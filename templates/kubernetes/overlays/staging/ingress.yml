@@ -9,8 +9,6 @@ metadata:
     # cert-manager
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
-    # external-dns
-    external-dns.alpha.kubernetes.io/hostname: <% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
     # CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>/"

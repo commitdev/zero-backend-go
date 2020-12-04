@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <% .Name %>
+spec:
+  template:
+    spec:
+      containers:
+        - name: <% .Name %>
+          image: <% index .Params `accountId` %>.dkr.ecr.<% index .Params `region` %>.amazonaws.com/<% .Name %>:last-deployed
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 0.1
+            limits:
+              memory: 256Mi
+              cpu: 1.0

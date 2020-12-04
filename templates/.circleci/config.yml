@@ -248,6 +248,9 @@ jobs:
               kubectl -n $NAMESPACE describe pod -l app=$DEPLOYMENT
               exit 1
             fi
+            MANIFEST=$(aws ecr batch-get-image --region << parameters.region >> --repository-name << parameters.repo >> --image-ids imageTag=latest --query 'images[].imageManifest' --output text)
+            aws ecr put-image --region << parameters.region >> --repository-name << parameters.repo >> --image-tag last-deployed --image-manifest "$MANIFEST"
+
 workflows:
     version: 2
     # The main workflow. Check out the code, build it, push it, deploy to staging, test, deploy to production
