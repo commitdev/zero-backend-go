@@ -142,7 +142,10 @@ echo
 telepresence --context ${CLUSTER_CONTEXT} --swap-deployment ${PROJECT_NAME} --namespace ${DEV_NAMESPACE} --expose 80 --run-shell
 
 # Ending dev environment
+## delete the most of resources (except ingress related, as we hit rate limit of certificate issuer(letsencrypt)
 echo
-kubectl --context ${CLUSTER_CONTEXT} delete namespaces/${DEV_NAMESPACE}
-echo "Your dev environment on Staging has been deleted completely"
+for r in hpa deployments services pods cronjob; do
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete $r --all
+done
+echo "Your dev environment resources under namespace ${DEV_NAMESPACE} have been deleted"
 echo
