@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"<% .Files.Repository %>/file"
 	"<% .Files.Repository %>/database"
 <%if eq (index .Params `userAuth`) "yes" %>	"<% .Files.Repository %>/internal/auth"
 <% end %>)
@@ -46,6 +47,8 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 		log.Printf("Hello, %q", html.EscapeString(r.URL.Path))
 	})
+
+	r.HandleFunc("/file/presigned", getPresignedUrl)
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
 	server := &http.Server{Addr: serverAddress, Handler: r}
@@ -93,4 +96,42 @@ func heartbeat() {
 			fh.Close()
 		}
 	}
+}
+
+type FileUrl struct {
+	Url    string `json:"url"`
+	Method string `json:"method"`
+}
+
+func getPresignedUrl(w http.ResponseWriter, r *http.Request) {
+	var fileUrl FileUrl
+	bucket := r.URL.Query().Get("bucket")
+	key := r.URL.Query().Get("key")
+	action := r.URL.Query().Get("action")
+	if action == "upload" {
+		urlStr, err := file.GetPresignedUploadURL(bucket, key)
+		fileUrl.Url = urlStr
+		fileUrl.Method = "PUT"
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	} else {
+		urlStr, err := file.GetPresignedDownloadURL(bucket, key)
+		fileUrl.Url = urlStr
+		fileUrl.Method = "GET"
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	fileUrlJson, err := json.Marshal(fileUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(fileUrlJson)
 }
