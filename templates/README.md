@@ -64,7 +64,7 @@ As per the image attribute noted above, you will likely be running custom argume
 You should specify those arguments [as per the documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/).
 
 # APIs Specification
-## File Upload
+## Get presigned url for upload
 ```
 GET /file/presigned?bucket=bucketname&key=filepath&action=upload
 ```
@@ -93,7 +93,7 @@ method | The method of request to upload the file
 }
 ```
 
-## File Download
+## Get presigned url for download
 ```
 GET /file/presigned?bucket=bucketname&key=filepath
 ```
