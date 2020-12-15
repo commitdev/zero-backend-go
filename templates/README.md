@@ -63,6 +63,66 @@ You likely want to run processes dependent on your backend codebase; so the imag
 As per the image attribute noted above, you will likely be running custom arguments in the context of that image.
 You should specify those arguments [as per the documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/).
 
+# APIs Specification
+## File Upload
+```
+GET /file/presigned?bucket=bucketname&key=filepath&action=upload
+```
+### Parameters
+Parameter | Description 
+--- | --- 
+bucket | The bucket name on S3
+key | The path+filename on the Bucket
+action | The action of upload or download
+
+### Request Example
+```
+curl --location --request GET 'http://localhost:8090/file/presigned?bucket=bigfile-bucket&key=hello.txt&action=upload'
+```
+### Response Body
+Properties | Description 
+--- | --- 
+url | The presigned url of uploading a file
+method | The method of request to upload the file
+
+### Response Body Example
+```
+{
+    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
+    "method": "PUT"
+}
+```
+
+## File Download
+```
+GET /file/presigned?bucket=bucketname&key=filepath
+```
+### Parameters
+Parameter | Description 
+--- | --- 
+bucket | The bucket name on S3
+key | The path+filename on the Bucket
+
+### Request Example
+```
+curl --location --request GET 'http://localhost:8090/file/presigned?bucket=bigfile-bucket&key=hello.txt'
+```
+### Response Body
+Properties | Description 
+--- | --- 
+url | The presigned url of uploading a file
+method | The method of request to upload the file
+
+### Response Body Example
+```
+{
+    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
+    "method": "GET"
+}
+```
+
+
+
 <!-- Links -->
 [base-cronjob]: ./kubernetes/base/cronjob.yml
 [base-deployment]: ./kubernetes/base/deployment.yml
