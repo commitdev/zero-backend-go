@@ -64,20 +64,34 @@ As per the image attribute noted above, you will likely be running custom argume
 You should specify those arguments [as per the documentation](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/).
 
 # APIs Specification
+
+## Enviroment Settings 
+Before you get presinged url from S3, make sure the following environment variables have been set.
+Variable | Description 
+--- | --- 
+AWS_ACCESS_KEY_ID | The IMA user's access key id with full control permission to S3
+AWS_Secret_Access_Key | The IMA user's secret access key
+AWS_REGION | The AWS region, such as "us-east-1", "us-west-2"
+AWS_S3_DEFAULT_BUCKET | optional, default bucket is applied if the bucket name isn't assigned by user
+
+
 ## Get presigned url for upload
 ```
-GET /file/presigned?bucket=bucketname&key=filepath&action=upload
+GET /file/presigned/:key[?bucket=bucketname]
 ```
 ### Parameters
 Parameter | Description 
 --- | --- 
-bucket | The bucket name on S3
 key | The path+filename on the Bucket
-action | The action of upload or download
+bucket | The bucket name on S3. The default value will be applied if it isn't given.
+
 
 ### Request Example
 ```
-curl --location --request GET 'http://localhost:8090/file/presigned?bucket=bigfile-bucket&key=hello.txt&action=upload'
+curl --location --request GET 'http://localhost:8090/file/presigned/hello.txt'
+```
+```
+curl --location --request GET 'http://localhost:8090/file/presigned/hello.txt?bucket=bigfile-bucket'
 ```
 ### Response Body
 Properties | Description 
@@ -92,20 +106,36 @@ method | The method of request to upload the file
     "method": "PUT"
 }
 ```
+### How to use this presigned url to upload
+#### Syntax
+```
+curl --loacation --request PUT '[presigned url for update]' --header 'Content-Type: [type]' --data-binary '[Absolute Path on local]'
+```
+#### Example
+```
+curl --location --request PUT 'https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4' \
+--header 'Content-Type: text/plain' \
+--data-binary '/user/work/hello.txt'
+```
+
 
 ## Get presigned url for download
 ```
-GET /file/presigned?bucket=bucketname&key=filepath
+GET /file/:key[?bucket=bucketname]
 ```
 ### Parameters
 Parameter | Description 
 --- | --- 
-bucket | The bucket name on S3
 key | The path+filename on the Bucket
+bucket | The bucket name on S3. The default value will be applied if it isn't given.
 
 ### Request Example
+
 ```
-curl --location --request GET 'http://localhost:8090/file/presigned?bucket=bigfile-bucket&key=hello.txt'
+curl --location --request GET 'http://localhost:8090/file/hello.txt'
+```
+```
+curl --location --request GET 'http://localhost:8090/file/hello.txt?bucket=bigfile-bucket'
 ```
 ### Response Body
 Properties | Description 
@@ -119,6 +149,12 @@ method | The method of request to upload the file
     "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
     "method": "GET"
 }
+```
+### How to use this presigned url to download
+#### download through browser
+Copy this presigned url and paste it into your browser, then done.
+#### download through curl
+curl --loacation --request GET '[presigned url for download]' 
 ```
 
 
