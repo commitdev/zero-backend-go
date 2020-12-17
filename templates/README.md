@@ -154,11 +154,9 @@ method | The method of request to upload the file
 #### download through browser
 Copy this presigned url and paste it into your browser, then done.
 #### download through curl
+```
 curl --loacation --request GET '[presigned url for download]' 
 ```
-
-
-
 <!-- Links -->
 [base-cronjob]: ./kubernetes/base/cronjob.yml
 [base-deployment]: ./kubernetes/base/deployment.yml
