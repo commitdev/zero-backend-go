@@ -77,8 +77,9 @@ AWS_S3_DEFAULT_BUCKET | optional, default bucket is applied if the bucket name i
 
 ## Get presigned url for upload
 ```
-GET /file/presigned/:key[?bucket=bucketname]
+GET /file/presigned?key=filepath[&bucket=bucketname]
 ```
+Note: The path variable :key doesn't allow the value is a path which includes '/' so that we change it from path variable to a query string 
 ### Parameters
 Parameter | Description 
 --- | --- 
@@ -88,10 +89,10 @@ bucket | The bucket name on S3. The default value will be applied if it isn't gi
 
 ### Request Example
 ```
-curl --location --request GET 'http://localhost:8090/file/presigned/hello.txt'
+curl --location --request GET 'http://localhost:8090/file/presigned?key=images/windows.png'
 ```
 ```
-curl --location --request GET 'http://localhost:8090/file/presigned/hello.txt?bucket=bigfile-bucket'
+curl --location --request GET 'http://localhost:8090/file/presigned/key=images/windows.png&bucket=bigfile-bucket'
 ```
 ### Response Body
 Properties | Description 
@@ -102,7 +103,7 @@ method | The method of request to upload the file
 ### Response Body Example
 ```
 {
-    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
+    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/images/windows.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
     "method": "PUT"
 }
 ```
@@ -113,7 +114,7 @@ curl --loacation --request PUT '[presigned url for update]' --header 'Content-Ty
 ```
 #### Example
 ```
-curl --location --request PUT 'https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4' \
+curl --location --request PUT 'https://bigfile-bucket.s3.us-west-2.amazonaws.com/images/windows.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4' \
 --header 'Content-Type: text/plain' \
 --data-binary '/user/work/hello.txt'
 ```
@@ -121,21 +122,21 @@ curl --location --request PUT 'https://bigfile-bucket.s3.us-west-2.amazonaws.com
 
 ## Get presigned url for download
 ```
-GET /file/:key[?bucket=bucketname]
+GET /file?key=filepath[&bucket=bucketname]
 ```
 ### Parameters
 Parameter | Description 
 --- | --- 
 key | The path+filename on the Bucket
-bucket | The bucket name on S3. The default value will be applied if it isn't given.
+bucket | Optional, The bucket name on S3. The default value will be applied if it isn't given.
 
 ### Request Example
 
 ```
-curl --location --request GET 'http://localhost:8090/file/hello.txt'
+curl --location --request GET 'http://localhost:8090/file?key=images/windows.png'
 ```
 ```
-curl --location --request GET 'http://localhost:8090/file/hello.txt?bucket=bigfile-bucket'
+curl --location --request GET 'http://localhost:8090/file?key=images/windows.png&bucket=bigfile-bucket'bucket=bigfile-bucket'
 ```
 ### Response Body
 Properties | Description 
@@ -146,7 +147,7 @@ method | The method of request to upload the file
 ### Response Body Example
 ```
 {
-    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/hello.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
+    "url": "https://bigfile-bucket.s3.us-west-2.amazonaws.com/images/windows.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIIJ25ZBTRCYZHE4A%2F20201215%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20201215T180519Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=981aa47912512e7816b2e22ca70d8d541220dea549cb2f12f34006f6adf31af4",
     "method": "GET"
 }
 ```
@@ -157,6 +158,7 @@ Copy this presigned url and paste it into your browser, then done.
 ```
 curl --loacation --request GET '[presigned url for download]' 
 ```
+
 <!-- Links -->
 [base-cronjob]: ./kubernetes/base/cronjob.yml
 [base-deployment]: ./kubernetes/base/deployment.yml

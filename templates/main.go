@@ -48,7 +48,10 @@ func main() {
 		log.Printf("Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
-	r.HandleFunc("/file/presigned", getPresignedUrl)
+
+	r.HandleFunc("/file/presigned", getPresignedUploadURL)
+	r.HandleFunc("/file", getPresignedDownloadURL)
+
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
 	server := &http.Server{Addr: serverAddress, Handler: r}
@@ -103,27 +106,59 @@ type FileUrl struct {
 	Method string `json:"method"`
 }
 
-func getPresignedUrl(w http.ResponseWriter, r *http.Request) {
+
+/**
+The path variable :key doesn't allow the value is a path which includes '/' so that
+we change :key from path variable to a query string 
+*/
+func getPresignedUploadURL(w http.ResponseWriter, r *http.Request) {
 	var fileUrl FileUrl
-	bucket := r.URL.Query().Get("bucket")
-	key := r.URL.Query().Get("key")
-	action := r.URL.Query().Get("action")
-	if action == "upload" {
-		urlStr, err := file.GetPresignedUploadURL(bucket, key)
-		fileUrl.Url = urlStr
-		fileUrl.Method = "PUT"
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	var bucket string
+
+	var key = r.URL.Query().Get("key")
+
+	if len(r.URL.Query().Get("bucket")) > 0 {
+		bucket = r.URL.Query().Get("bucket")
 	} else {
-		urlStr, err := file.GetPresignedDownloadURL(bucket, key)
-		fileUrl.Url = urlStr
-		fileUrl.Method = "GET"
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		bucket = os.Getenv("AWS_S3_DEFAULT_BUCKET")
+	}
+
+	urlStr, err := file.GetPresignedUploadURL(bucket, key)
+	fileUrl.Url = urlStr
+	fileUrl.Method = "PUT"
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fileUrlJson, err := json.Marshal(fileUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(fileUrlJson)
+}
+
+func getPresignedDownloadURL(w http.ResponseWriter, r *http.Request) {
+	var fileUrl FileUrl
+	var bucket string
+
+	var key = r.URL.Query().Get("key")
+
+	if len(r.URL.Query().Get("bucket")) > 0 {
+		bucket = r.URL.Query().Get("bucket")
+	} else {
+		bucket = os.Getenv("AWS_S3_DEFAULT_BUCKET")
+	}
+
+	urlStr, err := file.GetPresignedDownloadURL(bucket, key)
+	fileUrl.Url = urlStr
+	fileUrl.Method = "GET"
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	fileUrlJson, err := json.Marshal(fileUrl)
