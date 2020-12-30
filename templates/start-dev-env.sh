@@ -100,6 +100,26 @@ DEV_DATABASE_NAME=$(echo "dev${MY_USERNAME}" | tr -dc 'A-Za-z0-9')
 echo "  Domain: ${MY_EXT_HOSTNAME}"
 echo "  Database Name: ${DEV_DATABASE_NAME}"
 
+# Apply migration
+#FLYWAY_URL=jdbc:mysql://database.piggycloud2-me:3306/${DATABASE_NAME}
+#DEV_FLYWAY_URL=jdbc:mysql://database.piggycloud2-me:3306/${DEV_DATABASE_NAME}
+MIGRATION_JOB=${PROJECT_NAME}-migration
+SQL_DIR="${PWD}/database/migration"
+SCRIPT_SQL2CM="${SQL_DIR}/script2configmap.sh"
+## launch migration job
+(cd kubernetes/migration && \
+    (cat configmaps.yml && ${SCRIPT_SQL2CM}) | \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} apply -f - || error_exit "Failed to apply kubernetes migration configmap" && \
+    cat job.yml | \
+    sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"
+## confirm migration job done
+if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_JOB} ; then
+    echo "${MIGRATION_JOB} run failed:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_JOB}
+    error_exit "Failed migration. Leaving namespace ${DEV_NAMESPACE} for debugging"
+fi
+
 # Apply manifests
 (cd kubernetes/overlays/${CONFIG_ENVIRONMENT} && \
     kustomize build . | \

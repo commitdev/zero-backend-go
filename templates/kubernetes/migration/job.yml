@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: <% .Name %>-migration
+spec:
+  template:
+    spec:
+      containers:
+        - name: flyway
+          image: boxfuse/flyway:5.2.4
+          args:
+            - info
+            - repair
+            - migrate
+            - info
+          env:
+            - name: FLYWAY_URL
+              value: jdbc:<% index .Params `database` %>://database.<% .Name %>/<% index .Params `databaseName` %>
+            - name: FLYWAY_USER
+              valueFrom:
+                secretKeyRef:
+                  name: <% .Name %>
+                  key: DATABASE_USERNAME
+            - name: FLYWAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: <% .Name %>
+                  key: DATABASE_PASSWORD
+          volumeMounts:
+            - mountPath: /flyway/sql
+              name: sqlfiles
+      volumes:
+        - name: sqlfiles
+          configMap:
+            name: <% .Name %>-migration
+      restartPolicy: Never
