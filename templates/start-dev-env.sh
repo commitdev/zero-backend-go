@@ -101,22 +101,18 @@ echo "  Domain: ${MY_EXT_HOSTNAME}"
 echo "  Database Name: ${DEV_DATABASE_NAME}"
 
 # Apply migration
-#FLYWAY_URL=jdbc:mysql://database.piggycloud2-me:3306/${DATABASE_NAME}
-#DEV_FLYWAY_URL=jdbc:mysql://database.piggycloud2-me:3306/${DEV_DATABASE_NAME}
-MIGRATION_JOB=${PROJECT_NAME}-migration
+MIGRATION_NAME=${PROJECT_NAME}-migration
 SQL_DIR="${PWD}/database/migration"
-SCRIPT_SQL2CM="${SQL_DIR}/script2configmap.sh"
 ## launch migration job
 (cd kubernetes/migration && \
-    (cat configmaps.yml && ${SCRIPT_SQL2CM}) | \
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} apply -f - || error_exit "Failed to apply kubernetes migration configmap" && \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} --from-file ${SQL_DIR}/*.sql || error_exit "Failed to apply kubernetes migration configmap" && \
     cat job.yml | \
     sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"
 ## confirm migration job done
-if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_JOB} ; then
-    echo "${MIGRATION_JOB} run failed:"
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_JOB}
+if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_NAME} ; then
+    echo "${MIGRATION_NAME} run failed:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_NAME}
     error_exit "Failed migration. Leaving namespace ${DEV_NAMESPACE} for debugging"
 fi
 
@@ -164,7 +160,9 @@ telepresence --context ${CLUSTER_CONTEXT} --swap-deployment ${PROJECT_NAME} --na
 # Ending dev environment
 ## delete the most of resources (except ingress related, as we hit rate limit of certificate issuer(letsencrypt)
 echo
-for r in hpa deployments services pods cronjob; do
+kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete job ${MIGRATION_NAME}
+kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete cm ${MIGRATION_NAME}
+for r in hpa deployments services jobs pods cronjob; do
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete $r --all
 done
 echo "Your dev environment resources under namespace ${DEV_NAMESPACE} have been deleted"

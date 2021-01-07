@@ -235,17 +235,16 @@ jobs:
             NAMESPACE=<< parameters.namespace >>
             kubectl create namespace $NAMESPACE || echo "Namespace already exists"
 
-            MIGRATION_JOB=<< parameters.repo >>-migration
+            MIGRATION_NAME=<< parameters.repo >>-migration
             SQL_DIR="${PWD}/database/migration"
-            SCRIPT_SQL2CM="${SQL_DIR}/script2configmap.sh"
-            pushd .
-            cd kubernetes/migration
-            (cat configmaps.yml && $SCRIPT_SQL2CM) | kubectl -n $NAMESPACE apply -f -
-            kubectl -n $NAMESPACE delete job $MIGRATION_JOB || echo "no migration job existing for deletion" 
+            pushd kubernetes/migration
+            kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion" 
+            kubectl -n $NAMESPACE create configmap $MIGRATION_NAME --from-file ${SQL_DIR}/*.sql
+            kubectl -n $NAMESPACE delete job $MIGRATION_NAME || echo "no migration job existing for deletion" 
             kubectl -n $NAMESPACE create -f job.yml
-            if ! kubectl -n $NAMESPACE wait --for=condition=complete --timeout=180s job/$MIGRATION_JOB ; then
-                echo "$MIGRATION_JOB run failed:"
-                kubectl -n $NAMESPACE describe job $MIGRATION_JOB
+            if ! kubectl -n $NAMESPACE wait --for=condition=complete --timeout=180s job/$MIGRATION_NAME ; then
+                echo "$MIGRATION_NAME run failed:"
+                kubectl -n $NAMESPACE describe job $MIGRATION_NAME
                 exit 1
             fi
             popd
