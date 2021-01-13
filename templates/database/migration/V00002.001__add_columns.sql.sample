@@ -1,3 +1,0 @@
- ALTER TABLE address
- ADD COLUMN city VARCHAR(30) AFTER street_name,
- ADD COLUMN province VARCHAR(30) AFTER city
