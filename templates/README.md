@@ -69,3 +69,26 @@ You should specify those arguments [as per the documentation](https://kubernetes
 [base-deployment-secret]: ./kubernetes/base/deployment.yml#L49-58
 [env-prod]: ./kubernetes/overlays/production/deployment.yml
 [circleci-details]: ./.circleci/README.md
+
+## Database Migration
+By integrating database migration tool [Flyway](https://flywaydb.org/) with Circle CI and Dev Environment, you can get migration job run on your Kubernetes cluster. The job is defined in `kubernetes/migration/job.yml` and your SQL scripts are under `database/migrations/`. You can confirm the result on Dev Environment (by running ./start-dev-env.sh) first, and then git merge && auto-deploy to Staging/Production.
+
+The SQL scripts need to follow Flyway naming convention [here](https://flywaydb.org/documentation/concepts/migrations.html#sql-based-migrations), as below:
+
+V00001.001__create_tables.sql.sample:
+```
+CREATE TABLE address (
+    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    person_id INT(6),
+    street_number INT(10),
+    street_name VARCHAR(50),
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+V00002.001__add_columns.sql.sample:
+```
+ALTER TABLE address
+ ADD COLUMN city VARCHAR(30) AFTER street_name,
+ ADD COLUMN province VARCHAR(30) AFTER city
+```
