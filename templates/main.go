@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"<% .Files.Repository %>/database"
+	"<% .Files.Repository %>/internal/database"
 <%if eq (index .Params `userAuth`) "yes" %>	"<% .Files.Repository %>/internal/auth"
 <% end %>)
 

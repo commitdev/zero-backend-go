@@ -234,6 +234,21 @@ jobs:
             DEPLOYMENT=<< parameters.repo >>
             NAMESPACE=<< parameters.namespace >>
             kubectl create namespace $NAMESPACE || echo "Namespace already exists"
+
+            MIGRATION_NAME=<< parameters.repo >>-migration
+            SQL_DIR="${PWD}/database/migration"
+            pushd kubernetes/migration
+            kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion" 
+            kubectl -n $NAMESPACE create configmap $MIGRATION_NAME --from-file ${SQL_DIR}/*.sql
+            kubectl -n $NAMESPACE delete job $MIGRATION_NAME || echo "no migration job existing for deletion" 
+            kubectl -n $NAMESPACE create -f job.yml
+            if ! kubectl -n $NAMESPACE wait --for=condition=complete --timeout=180s job/$MIGRATION_NAME ; then
+                echo "$MIGRATION_NAME run failed:"
+                kubectl -n $NAMESPACE describe job $MIGRATION_NAME
+                exit 1
+            fi
+            popd
+
             cd kubernetes/overlays/<< parameters.config-environment >>
             IMAGE=<< parameters.account-id >>.dkr.ecr.<< parameters.region >>.amazonaws.com/<< parameters.repo >>
             kustomize edit set image fake-image=${IMAGE}:${VERSION_TAG}
