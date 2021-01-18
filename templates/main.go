@@ -13,7 +13,12 @@ import (
 	"syscall"
 	"time"
 
+
+
+
 	"<% .Files.Repository %>/internal/database"
+<%if eq (index .Params `fileUploads`) "yes" %>	"<% .Files.Repository %>/internal/file"
+<% end %>
 <%if eq (index .Params `userAuth`) "yes" %>	"<% .Files.Repository %>/internal/auth"
 <% end %>)
 
@@ -46,6 +51,11 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 		log.Printf("Hello, %q", html.EscapeString(r.URL.Path))
 	})
+
+
+	r.HandleFunc("/file/presigned", file.getPresignedUploadURL)
+	r.HandleFunc("/file", file.getPresignedDownloadURL)
+
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
 	server := &http.Server{Addr: serverAddress, Handler: r}
@@ -94,3 +104,5 @@ func heartbeat() {
 		}
 	}
 }
+
+
