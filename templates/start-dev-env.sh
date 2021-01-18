@@ -100,6 +100,22 @@ DEV_DATABASE_NAME=$(echo "dev${MY_USERNAME}" | tr -dc 'A-Za-z0-9')
 echo "  Domain: ${MY_EXT_HOSTNAME}"
 echo "  Database Name: ${DEV_DATABASE_NAME}"
 
+# Apply migration
+MIGRATION_NAME=${PROJECT_NAME}-migration
+SQL_DIR="${PWD}/database/migration"
+## launch migration job
+(cd kubernetes/migration && \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} --from-file ${SQL_DIR}/*.sql || error_exit "Failed to apply kubernetes migration configmap" && \
+    cat job.yml | \
+    sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"
+## confirm migration job done
+if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_NAME} ; then
+    echo "${MIGRATION_NAME} run failed:"
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_NAME}
+    error_exit "Failed migration. Leaving namespace ${DEV_NAMESPACE} for debugging"
+fi
+
 # Apply manifests
 (cd kubernetes/overlays/${CONFIG_ENVIRONMENT} && \
     kustomize build . | \
@@ -142,7 +158,12 @@ echo
 telepresence --context ${CLUSTER_CONTEXT} --swap-deployment ${PROJECT_NAME} --namespace ${DEV_NAMESPACE} --expose 80 --run-shell
 
 # Ending dev environment
+## delete the most of resources (except ingress related, as we hit rate limit of certificate issuer(letsencrypt)
 echo
-kubectl --context ${CLUSTER_CONTEXT} delete namespaces/${DEV_NAMESPACE}
-echo "Your dev environment on Staging has been deleted completely"
+kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete job ${MIGRATION_NAME}
+kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete cm ${MIGRATION_NAME}
+for r in hpa deployments services jobs pods cronjob; do
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} delete $r --all
+done
+echo "Your dev environment resources under namespace ${DEV_NAMESPACE} have been deleted"
 echo

@@ -31,6 +31,8 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |       |   |-- deployment.yml
 |       |   |-- kustomization.yml
 |       |   |-- service.yml
+│       ├── migration/
+│       │   └── job.yml
 |       |-- overlays/
 |       |   |-- production/
 |       |   |   |-- deployment.yml
