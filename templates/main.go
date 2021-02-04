@@ -52,10 +52,12 @@ func main() {
 		log.Printf("Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
+
 <%if eq (index .Params `fileUploads`) "yes" %>
 	r.HandleFunc("/file/presigned", file.getPresignedUploadURL)
 	r.HandleFunc("/file", file.getPresignedDownloadURL)
 <% end %>
+
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
 	server := &http.Server{Addr: serverAddress, Handler: r}
