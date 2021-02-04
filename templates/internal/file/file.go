@@ -1,3 +1,5 @@
+package file
+
 import (
 	"context"
 	"encoding/json"
@@ -11,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"<% .Files.Repository %>/file"
+	"<% .Files.Repository %>/storagecloud"
 )
 
 type FileUrl struct {
@@ -24,7 +26,7 @@ type FileUrl struct {
 The path variable :key doesn't allow the value is a path which includes '/' so that
 we change :key from path variable to a query string 
 */
-func getPresignedUploadURL(w http.ResponseWriter, r *http.Request) {
+func PresignedUploadURL(w http.ResponseWriter, r *http.Request) {
 	var fileUrl FileUrl
 	var bucket string
 
@@ -36,7 +38,7 @@ func getPresignedUploadURL(w http.ResponseWriter, r *http.Request) {
 		bucket = os.Getenv("AWS_S3_DEFAULT_BUCKET")
 	}
 
-	urlStr, err := file.GetPresignedUploadURL(bucket, key)
+	urlStr, err := storagecloud.GetPresignedUploadURL(bucket, key)
 	fileUrl.Url = urlStr
 	fileUrl.Method = "PUT"
 	if err != nil {
@@ -54,7 +56,7 @@ func getPresignedUploadURL(w http.ResponseWriter, r *http.Request) {
 	w.Write(fileUrlJson)
 }
 
-func getPresignedDownloadURL(w http.ResponseWriter, r *http.Request) {
+func PresignedDownloadURL(w http.ResponseWriter, r *http.Request) {
 	var fileUrl FileUrl
 	var bucket string
 
@@ -66,7 +68,7 @@ func getPresignedDownloadURL(w http.ResponseWriter, r *http.Request) {
 		bucket = os.Getenv("AWS_S3_DEFAULT_BUCKET")
 	}
 
-	urlStr, err := file.GetPresignedDownloadURL(bucket, key)
+	urlStr, err := storagecloud.GetPresignedDownloadURL(bucket, key)
 	fileUrl.Url = urlStr
 	fileUrl.Method = "GET"
 	if err != nil {

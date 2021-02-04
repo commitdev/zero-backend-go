@@ -14,12 +14,12 @@ import (
 	"time"
 
 
-
-
 	"<% .Files.Repository %>/internal/database"
-<%if eq (index .Params `fileUploads`) "yes" %>	"<% .Files.Repository %>/internal/file"
+<%if eq (index .Params `fileUploads`) "yes" %>	
+    "<% .Files.Repository %>/internal/file"
 <% end %>
-<%if eq (index .Params `userAuth`) "yes" %>	"<% .Files.Repository %>/internal/auth"
+<%if eq (index .Params `userAuth`) "yes" %>	
+	"<% .Files.Repository %>/internal/auth"
 <% end %>)
 
 const gracefulShutdownTimeout = 10 * time.Second
@@ -53,8 +53,10 @@ func main() {
 	})
 
 
-	r.HandleFunc("/file/presigned", file.getPresignedUploadURL)
-	r.HandleFunc("/file", file.getPresignedDownloadURL)
+<%if eq (index .Params `fileUploads`) "yes" %>
+	r.HandleFunc("/file/presigned", file.PresignedUploadURL)
+	r.HandleFunc("/file", file.PresignedDownloadURL)
+<% end %>
 
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
