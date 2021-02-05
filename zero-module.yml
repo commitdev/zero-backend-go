@@ -95,7 +95,12 @@ conditions:
     matchField: userAuth
     whenValue: "no"
     data:
-    - auth
+    - internal/auth
     - kubernetes/base/auth.yml
     - kubernetes/overlays/staging/auth.yml
     - kubernetes/overlays/production/auth.yml
+  - action: ignoreFile
+    matchField: fileUploads
+    whenValue: "no"
+    data:
+    - internal/file
