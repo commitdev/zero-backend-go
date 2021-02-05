@@ -1,17 +1,9 @@
 package file
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"html"
-	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-	"time"
 
 	"<% .Files.Repository %>/storagecloud"
 )

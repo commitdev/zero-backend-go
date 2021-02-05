@@ -78,6 +78,12 @@ parameters:
     execute: uuidgen | head -c 8
   - field: databaseName
     execute: echo "$projectName"| sed "s/[- ]//g"
+  - field: fileUploads
+    label: Enable file uploads using S3 and Cloudfront signed URLs? (Will require manual creation of a Cloudfront keypair in AWS)
+    default: yes
+    options:
+      - "yes"
+      - "no"
   - field: userAuth
     label: Enable user management using Kratos and authentication using the Oathkeeper access proxy?
     default: yes
@@ -89,7 +95,12 @@ conditions:
     matchField: userAuth
     whenValue: "no"
     data:
-    - auth
+    - internal/auth
     - kubernetes/base/auth.yml
     - kubernetes/overlays/staging/auth.yml
     - kubernetes/overlays/production/auth.yml
+  - action: ignoreFile
+    matchField: fileUploads
+    whenValue: "no"
+    data:
+    - internal/file
