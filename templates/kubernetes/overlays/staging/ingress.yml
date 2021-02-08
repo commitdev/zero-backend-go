@@ -11,7 +11,7 @@ metadata:
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
     # CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>/"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>"
 
 spec:
   rules:
