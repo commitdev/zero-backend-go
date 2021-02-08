@@ -1,0 +1,48 @@
+name: deploy
+description: create kubernetes job to run migration
+inputs:
+  namespace:
+    description: Kubernetes namespace to run migration on
+    required: true
+  repository-name:
+    description: name of repository, used to create migration job name
+    required: true
+  image-tag:
+    description: image-tag to deploy
+    required: true
+  docker-host:
+    description: Docker host consisting of the deploy image
+    required: true
+  region:
+    description: Name of AWS region
+    default: us-west-2
+    required: false
+  environment-overlay:
+    description: overlay folder to pick from for Kustomize apply
+    default: staging
+    required: false
+runs:
+  using: "composite"
+  steps:
+  - name: Migration
+    shell: bash
+    run: |
+      DEPLOYMENT=${{ inputs.repository-name }}
+      NAMESPACE=${{ inputs.namespace }}
+
+      cd kubernetes/overlays/${{ inputs.environment-overlay }}
+      IMAGE=${{ inputs.docker-host }}/${{ inputs.repository-name }}
+      kustomize edit set image fake-image=${IMAGE}:${{ inputs.image-tag }}
+      kustomize build . | kubectl apply -f - -n $NAMESPACE
+      if ! kubectl -n $NAMESPACE rollout status deployment/$DEPLOYMENT -w --timeout=180s ; then
+        echo "$DEPLOYMENT rollout check failed:"
+        echo "$DEPLOYMENT deployment:"
+        kubectl -n $NAMESPACE describe deployment $DEPLOYMENT
+        echo "$DEPLOYMENT replicaset:"
+        kubectl -n $NAMESPACE describe rs -l app=$DEPLOYMENT
+        echo "$DEPLOYMENT pods:"
+        kubectl -n $NAMESPACE describe pod -l app=$DEPLOYMENT
+        exit 1
+      fi
+      MANIFEST=$(aws ecr batch-get-image --region ${{ inputs.region }} --repository-name ${{ inputs.repository-name }} --image-ids imageTag=latest --query 'images[].imageManifest' --output text)
+      aws ecr put-image --region ${{ inputs.region }} --repository-name ${{ inputs.repository-name }} --image-tag last-deployed --image-manifest "$MANIFEST"

@@ -1,0 +1,37 @@
+name: db-migration
+description: create kubernetes job to run migration
+inputs:
+  namespace:
+    description: Kubernetes namespace to run migration on
+    required: true
+  repository-name:
+    description: name of repository, used to create migration job name
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Migration
+    shell: bash
+    run: |
+      NAMESPACE=${{ inputs.namespace }}
+      MIGRATION_NAME=${{ inputs.repository-name }}-migration
+      SQL_DIR="${GITHUB_WORKSPACE}/database/migration"
+
+      kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion"
+      kubectl -n $NAMESPACE delete job $MIGRATION_NAME || echo "no migration job existing for deletion"
+
+      if [ -f ${SQL_DIR}/*.sql ] ; then
+        pushd kubernetes/migration
+        kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion"
+        kubectl -n $NAMESPACE create configmap $MIGRATION_NAME --from-file ${SQL_DIR}/*.sql
+
+        kubectl -n $NAMESPACE create -f job.yml
+        if ! kubectl -n $NAMESPACE wait --for=condition=complete --timeout=180s job/$MIGRATION_NAME ; then
+            echo "$MIGRATION_NAME run failed:"
+            kubectl -n $NAMESPACE describe job $MIGRATION_NAME
+            exit 1
+        fi
+        popd
+      else
+        kubectl -n $NAMESPACE create configmap $MIGRATION_NAME
+      fi

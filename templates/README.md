@@ -66,8 +66,8 @@ You should specify those arguments [as per the documentation](https://kubernetes
 
 # APIs Specification
 
-## Enviroment Settings 
-Before you get presinged url from S3, make sure the following environment variables have been set.
+## Environment Settings 
+Before you get presigned url from S3, make sure the following environment variables have been set.
 Variable | Description 
 --- | --- 
 AWS_ACCESS_KEY_ID | The IMA user's access key id with full control permission to S3
@@ -111,7 +111,7 @@ method | The method of request to upload the file
 ### How to use this presigned url to upload
 #### Syntax
 ```
-curl --loacation --request PUT '[presigned url for update]' --header 'Content-Type: [type]' --data-binary '[Absolute Path on local]'
+curl --location --request PUT '[presigned url for update]' --header 'Content-Type: [type]' --data-binary '[Absolute Path on local]'
 ```
 #### Example
 ```
@@ -157,7 +157,7 @@ method | The method of request to upload the file
 Copy this presigned url and paste it into your browser, then done.
 #### download through curl
 ```
-curl --loacation --request GET '[presigned url for download]' 
+curl --location --request GET '[presigned url for download]' 
 ```
 
 # Database Migration
@@ -169,7 +169,7 @@ Migrations will be automatically run against your dev environment when running `
 The SQL scripts need to follow Flyway naming convention [here](https://flywaydb.org/documentation/concepts/migrations.html#sql-based-migrations), which allow you to create different types of migrations:
 * Versioned - These have a numerically incrementing version id and will be kept track of by Flyway. Only versions that have not yet been applied will be run during the migration process.
 * Undo - These have a matching version to a versioned migration and can be used to undo the effects of a migration if you need to roll back.
-* Repeatable - These will be run whenenver their content changes. This can be useful for seeding data or updating views or functions.
+* Repeatable - These will be run whenever their content changes. This can be useful for seeding data or updating views or functions.
 
 Here are some example migrations:
 
