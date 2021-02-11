@@ -44,6 +44,9 @@ Your repository comes with a end-to-end CI/CD pipeline, which includes the follo
 Your application is assumed[(ref)][base-deployment-secret] to rely on a database(RDS), In your Kubernetes
 application namespace, an application specific user has been created for you and hooked up to the application already.
 
+## Cache service
+Your application is assumed to rely on a cache service(ElastiCache) defined in [kubernetes/base/kustomization.yml][base-configuration].
+
 ## Cron Jobs
 An example cron job is specified in [kubernetes/base/cronjob.yml][base-cronjob].
 The default configuration specifies `suspend: true` to ensure this cronjob does not run unless you want to enable it.
@@ -192,6 +195,7 @@ ALTER TABLE address
 ```
 
 <!-- Links -->
+[base-configuration]: ./kubernetes/base/kustomization.yml
 [base-cronjob]: ./kubernetes/base/cronjob.yml
 [base-deployment]: ./kubernetes/base/deployment.yml
 [base-deployment-secret]: ./kubernetes/base/deployment.yml#L49-58
