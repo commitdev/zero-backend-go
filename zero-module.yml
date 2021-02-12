@@ -73,7 +73,7 @@ parameters:
   - field: cacheStore
     label: "Cache store to use (default: no cache)"
     options:
-      - ""
+      - "none"
       - "redis"
       - "memcached"
   - field: accountId
