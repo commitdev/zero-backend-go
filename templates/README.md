@@ -192,7 +192,6 @@ ALTER TABLE address
 ```
 
 <!-- Links -->
-[base-configuration]: ./kubernetes/base/kustomization.yml
 [base-cronjob]: ./kubernetes/base/cronjob.yml
 [base-deployment]: ./kubernetes/base/deployment.yml
 [base-deployment-secret]: ./kubernetes/base/deployment.yml#L49-58
