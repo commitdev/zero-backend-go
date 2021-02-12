@@ -15,6 +15,9 @@ configMapGenerator:
     - DATABASE_PORT=<%if eq (index .Params `database`) "postgres" %>5432<% else if eq (index .Params `database`) "mysql" %>3306<% end %>
     - DATABASE_NAME=<% index .Params `databaseName` %>
     - SERVICE_PORT=80
-
+<%if ne (index .Params `cacheStore`) "none" %>    - CACHE_ENGINE=<% index .Params `cacheStore` %>
+    - CACHE_ENDPOINT=cache-<% index .Params `cacheStore` %>.<% .Name %>
+    - CACHE_PORT=<%if eq (index .Params `cacheStore`) "redis" %>6379<% else if eq (index .Params `cacheStore`) "memcached" %>11211<% end %>
+<% end %>
 commonLabels:
   app: <% .Name %>

@@ -70,6 +70,12 @@ parameters:
     options:
       - "postgres"
       - "mysql"
+  - field: cacheStore
+    label: "Cache store to use (default: no cache)"
+    options:
+      - "none"
+      - "redis"
+      - "memcached"
   - field: accountId
     label: AWS Account ID
     execute: aws sts get-caller-identity --query "Account" | tr -d '"'
