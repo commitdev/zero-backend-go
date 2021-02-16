@@ -1,11 +1,11 @@
 name: deploy
-description: create kubernetes job to run migration
+description: Deploy docker image by image-tag to kubernetes
 inputs:
   namespace:
-    description: Kubernetes namespace to run migration on
+    description: Kubernetes namespace to deploy
     required: true
   repository-name:
-    description: name of repository, used to create migration job name
+    description: Name of ECR repository containing the image
     required: true
   image-tag:
     description: image-tag to deploy
@@ -18,7 +18,7 @@ inputs:
     default: us-west-2
     required: false
   environment-overlay:
-    description: overlay folder to pick from for Kustomize apply
+    description: Overlay folder to pick from for Kustomize apply
     default: staging
     required: false
 runs:
