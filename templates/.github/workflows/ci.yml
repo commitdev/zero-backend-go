@@ -1,3 +1,11 @@
+# CI pipeline
+# This runs against all the commits landed on master
+# It will do the following things:
+# - run sanity tests against the checked-out code
+# - build an image and upload the docker image to ECR
+# - deploy to staging environment
+# - run smoke test against staging enviroment
+# - deploy to production
 name: CI Pipeline
 on:
   push:
@@ -48,7 +56,7 @@ jobs:
             push: true
             tags: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com/${{ env.repo }}:${{ env.IMAGE_TAG }},${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com/${{ env.repo }}:latest
 
-  deploy:
+  staging-deploy:
       needs: build
       runs-on: ubuntu-latest
       env:
@@ -95,7 +103,7 @@ jobs:
             region: ${{ env.region }}
             environment-overlay: ${{ env.environment-overlay }}
   integration-test:
-    needs: [deploy]
+    needs: [staging-deploy]
     runs-on: ubuntu-latest
     name: integration-test
     steps:
