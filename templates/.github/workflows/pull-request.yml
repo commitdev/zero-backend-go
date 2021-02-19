@@ -1,0 +1,19 @@
+# Pull request
+# they are sanity checks that runs on every commit in a PR
+# By default your repository setup will require a pre-configured list [`unit-test`] of status for merging,
+# You can modify this behavior in the Github's Branch protection settings
+name: Pull request
+on:
+  pull_request:
+    branches: ['*']
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      build_env: production
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Unit Tests
+      uses: actions/setup-go@v2
+    - run: go test -v ./...

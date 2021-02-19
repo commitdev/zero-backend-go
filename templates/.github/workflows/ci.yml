@@ -1,0 +1,161 @@
+# CI pipeline
+# This runs against all the commits landed on master
+# It will do the following things:
+# - run sanity tests against the checked-out code
+# - build an image and upload the docker image to ECR
+# - deploy to staging environment
+# - run smoke test against staging enviroment
+# - deploy to production
+name: CI Pipeline
+on:
+  push:
+    branches: [master, main]
+env:
+  # Environment variables shared across jobs and doesn't change per environment
+  region: <% index .Params `region` %>
+  accountId: "<% index .Params `accountId` %>"
+  repo: <% .Name %>
+  namespace: <% .Name %>
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      build_env: production
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Unit Tests
+      uses: actions/setup-go@v2
+    - run: |
+        go get -u github.com/jstemmer/go-junit-report
+        mkdir -p test-reports
+        go test -v ./...
+
+  build:
+      needs: unit-test
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set IMAGE_TAG as env
+          run: |
+            IMAGE_TAG=$(git rev-parse --short=7 ${{ github.sha }})
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.region }}
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+        - name: Build and push
+          id: docker_build
+          uses: docker/build-push-action@v2
+          with:
+            push: true
+            tags: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com/${{ env.repo }}:${{ env.IMAGE_TAG }}
+
+  staging-deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      env:
+        environment-overlay: staging
+        cluster-name: "<% .Name %>-stage-<% index .Params `region` %>"
+        cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-deployer-stage"
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set IMAGE_TAG as env
+          run: |
+            IMAGE_TAG=$(git rev-parse --short=7 ${{ github.sha }})
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+        - name: Install kubectl
+          uses: azure/setup-kubectl@v1
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.region }}
+        - name: Setup binaries(aws-cli/kustomize/iam-authenticator)
+          uses: ./.github/actions/setup-aws-kustomize
+          with:
+            cluster-authentication-role-arn: ${{ env.cluster-authentication-role-arn }}
+            cluster-name: ${{ env.cluster-name }}
+            region: ${{ env.region }}
+        - name: Check Namespace
+          run: |
+            DEPLOYMENT=${{ env.repo }}
+            NAMESPACE=${{ env.namespace }}
+            kubectl create namespace $NAMESPACE || echo "Namespace already exists"
+        - name: Database migration
+          uses: ./.github/actions/db-migration
+          with:
+            namespace: ${{ env.namespace }}
+            repository-name: ${{ env.repo }}
+        - name: Deploy image
+          uses: ./.github/actions/deploy
+          with:
+            namespace: ${{ env.namespace }}
+            repository-name: ${{ env.repo }}
+            image-tag: ${{ env.IMAGE_TAG }}
+            docker-host: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com
+            region: ${{ env.region }}
+            environment-overlay: ${{ env.environment-overlay }}
+  integration-test:
+    needs: [staging-deploy]
+    runs-on: ubuntu-latest
+    name: integration-test
+    steps:
+    ## Example of smoke test against staging env before deploying to production
+    ## To be enhanced to more sophisicated checks
+    - run: echo "TEST_RESPONSE_COD=$(curl -o /dev/null -s -w \"%{http_code}\" https://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>)" >> $GITHUB_ENV
+    - if: env.TEST_RESPONSE_COD >= 400
+      run: exit 1
+  production-deploy:
+    needs: [build, integration-test]
+    runs-on: ubuntu-latest
+    name: production-deploy
+    env:
+        environment-overlay: production
+        cluster-name: "<% .Name %>-prod-<% index .Params `region` %>"
+        cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-deployer-prod"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set IMAGE_TAG as env
+        run: |
+          IMAGE_TAG=$(git rev-parse --short=7 ${{ github.sha }})
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.region }}
+      - name: Setup binaries(aws-cli/kustomize/iam-authenticator)
+        uses: ./.github/actions/setup-aws-kustomize
+        with:
+          cluster-authentication-role-arn: ${{ env.cluster-authentication-role-arn }}
+          cluster-name: ${{ env.cluster-name }}
+          region: ${{ env.region }}
+      - name: Check Namespace
+        run: |
+          DEPLOYMENT=${{ env.repo }}
+          NAMESPACE=${{ env.namespace }}
+          kubectl create namespace $NAMESPACE || echo "Namespace already exists"
+      - name: Database migration
+        uses: ./.github/actions/db-migration
+        with:
+          namespace: ${{ env.namespace }}
+          repository-name: ${{ env.repo }}
+      - name: Deploy image
+        uses: ./.github/actions/deploy
+        with:
+          namespace: ${{ env.namespace }}
+          repository-name: ${{ env.repo }}
+          image-tag: ${{ env.IMAGE_TAG }}
+          docker-host: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com
+          region: ${{ env.region }}
+          environment-overlay: ${{ env.environment-overlay }}

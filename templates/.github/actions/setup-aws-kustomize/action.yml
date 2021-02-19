@@ -1,0 +1,36 @@
+name: setup-kustomize
+description: setup kustomize on an image
+inputs:
+  # this step has pre-requisite of AWS-cli and kubectl being installed
+  cluster-name:
+    description: Name of cluster using `aws eks` tool
+    required: true
+  cluster-authentication-role-arn:
+    description: role-arn used with AWS-iam-authenticator for kubernetes cluster
+    required: true
+  region:
+    description: Name of AWS region
+    default: us-west-2
+    required: false
+runs:
+  using: "composite"
+  steps:
+    # Deploy to s3
+    - name: Install aws cli
+      shell: bash
+      run: python -m pip install --upgrade pip awscli
+    - name: Install kustomize
+      shell: bash
+      run: |
+        KUSTOMIZE_VERSION=3.5.4
+        curl -L -o ./kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+        sudo tar xvzf ./kustomize.tar.gz -C /usr/local/bin/
+        sudo chmod +x /usr/local/bin/kustomize
+        kustomize version
+    - name: Setup kubernetes configuration
+      shell: bash
+      run: |
+        aws eks update-kubeconfig --name ${{ inputs.cluster-name }} \
+        --region ${{ inputs.region }} \
+        --role-arn ${{ inputs.cluster-authentication-role-arn }}
+        cat ~/.kube/config

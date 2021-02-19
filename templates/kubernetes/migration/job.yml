@@ -15,7 +15,7 @@ spec:
             - info
           env:
             - name: FLYWAY_URL
-              value: jdbc:<% index .Params `database` %>://database.<% .Name %>/<% index .Params `databaseName` %>
+              value: jdbc:<%if eq (index .Params `database`) "postgres" %>postgresql<% else if eq (index .Params `database`) "mysql" %>mysql<% end %>://database.<% .Name %>/<% index .Params `databaseName` %>
             - name: FLYWAY_USER
               valueFrom:
                 secretKeyRef:
