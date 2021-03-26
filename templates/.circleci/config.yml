@@ -239,7 +239,7 @@ jobs:
             SQL_DIR="${PWD}/database/migration"
             pushd kubernetes/migration
             kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion" 
-            if [ -f ${SQL_DIR}/*.sql ] ; then
+            if [ `ls ${SQL_DIR}/*.sql 2>/dev/null | wc -l` -gt 0 ] ; then
                 kubectl -n $NAMESPACE create configmap $MIGRATION_NAME --from-file ${SQL_DIR}/*.sql
             else
                 kubectl -n $NAMESPACE create configmap $MIGRATION_NAME
