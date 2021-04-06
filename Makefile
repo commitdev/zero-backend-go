@@ -44,10 +44,8 @@ summary:
 	@echo $(shell echo ${ENVIRONMENT} | grep prod > /dev/null && echo "- Production API: ${productionBackendSubdomain}${productionHostRoot}")
 	@echo $(shell echo ${ENVIRONMENT} | grep stage > /dev/null && echo "- Staging API: ${stagingBackendSubdomain}${stagingHostRoot}")
 
-REQUIRED_BINS_GHA := gh
 check:
 ifeq ($(CIVendor), github-actions)
-	$(foreach bin, $(REQUIRED_BINS_GHA),\
-			$(if $(shell command -v $(bin) 2> /dev/null),$(info Found `$(bin)`),$(error Please install `$(bin)`)))
+	sh scripts/required-bins.sh gh
 	sh scripts/gha-setup.sh check
 endif
