@@ -35,7 +35,7 @@ circle_ci_setup:
 	curl -X POST https://circleci.com/api/v1.1/project/github/${GITHUB_ORG}/${GITHUB_REPO}/follow?circle-token=${CIRCLECI_API_KEY}
 
 github_actions_setup:
-	sh scripts/gha-setup.sh
+	sh scripts/gha-setup.sh setup
 
 summary:
 	@echo "zero-deployable-backend:"
@@ -43,3 +43,11 @@ summary:
 	@echo "- Deployment Pipeline URL: https://app.circleci.com/pipelines/github/${GITHUB_ORG}/${GITHUB_REPO}"
 	@echo $(shell echo ${ENVIRONMENT} | grep prod > /dev/null && echo "- Production API: ${productionBackendSubdomain}${productionHostRoot}")
 	@echo $(shell echo ${ENVIRONMENT} | grep stage > /dev/null && echo "- Staging API: ${stagingBackendSubdomain}${stagingHostRoot}")
+
+REQUIRED_BINS_GHA := gh
+check:
+ifeq ($(CIVendor), github-actions)
+	$(foreach bin, $(REQUIRED_BINS_GHA),\
+			$(if $(shell command -v $(bin) 2> /dev/null),$(info Found `$(bin)`),$(error Please install `$(bin)`)))
+	sh scripts/gha-setup.sh check
+endif

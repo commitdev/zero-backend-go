@@ -1,7 +1,7 @@
 name: zero-deployable-backend
 description: 'zero module for a basic backend service running in kubernetes'
 author: 'Commit'
-zeroVersion: '>= 0.1.0'
+zeroVersion: '>= 0.1.1'
 
 dependsOn:
 - zero-aws-eks-stack
