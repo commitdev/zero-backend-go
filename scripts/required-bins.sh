@@ -1,3 +1,5 @@
+#!/bin/bash
+
 REQUIRED_BINS=$@
 FOUND_BINS=
 MISSING_BINS=

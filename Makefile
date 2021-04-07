@@ -43,9 +43,3 @@ summary:
 	@echo "- Deployment Pipeline URL: https://app.circleci.com/pipelines/github/${GITHUB_ORG}/${GITHUB_REPO}"
 	@echo $(shell echo ${ENVIRONMENT} | grep prod > /dev/null && echo "- Production API: ${productionBackendSubdomain}${productionHostRoot}")
 	@echo $(shell echo ${ENVIRONMENT} | grep stage > /dev/null && echo "- Staging API: ${stagingBackendSubdomain}${stagingHostRoot}")
-
-check:
-ifeq ($(CIVendor), github-actions)
-	sh scripts/required-bins.sh gh
-	sh scripts/gha-setup.sh check
-endif

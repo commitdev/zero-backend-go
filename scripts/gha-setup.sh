@@ -1,6 +1,13 @@
 #!/bin/bash
+set -e
 
 COMMAND=$1
+
+## Setup variables for checks
+GITHUB_ORG=$(echo ${REPOSITORY} | cut -d "/" -f 2)
+GITHUB_REPO=$(echo ${REPOSITORY} | cut -d "/" -f 3)
+RANDOM_SEED=${randomSeed}
+REGION=${region}
 
 # In order to set project env-vars, we must encrypt secrets
 # Using gh client allows us to set the secret without installing another
@@ -54,6 +61,7 @@ EOF
 
 check () {
 	# Check github token is able to access this repo
+	sh scripts/required-bins.sh gha
 	curl -s -XGET "https://api.github.com/repos/$GITHUB_ORG/${GITHUB_REPO}" \
 	--header "Authorization: token $GITHUB_ACCESS_TOKEN" --header 'Content-Type: application/json' | jq -e ".name == \"${GITHUB_REPO}\""
 }
