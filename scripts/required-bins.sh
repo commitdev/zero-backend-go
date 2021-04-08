@@ -17,5 +17,5 @@ done
 if [[ "$EXIT_CODE" == "0" ]]; then
   echo "Successfully found binary(s): $FOUND_BINS";exit $EXIT_CODE
 else
-  >&2 echo "Missing binary(s): $MISSING_BINS"; exit $EXIT_CODE
+  echo "Missing binary(s): $MISSING_BINS" >&2 ; exit $EXIT_CODE
 fi

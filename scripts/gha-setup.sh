@@ -61,7 +61,7 @@ EOF
 
 check () {
 	# Check if required binaries are installed on user's environment
-	sh scripts/required-bins.sh gha
+	sh scripts/required-bins.sh gh
 	# Check github token is able to access this repo
 	curl -s -XGET "https://api.github.com/repos/$GITHUB_ORG/${GITHUB_REPO}" \
 	--header "Authorization: token $GITHUB_ACCESS_TOKEN" --header 'Content-Type: application/json' | jq -e ".name == \"${GITHUB_REPO}\""
