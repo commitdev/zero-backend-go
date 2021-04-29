@@ -20,7 +20,11 @@ import (
 <% end %>
 <%if eq (index .Params `userAuth`) "yes" %>	
 	"<% .Files.Repository %>/internal/auth"
-<% end %>)
+<%- end %>
+<%if eq (index .Params `billingEnabled`) "yes" %>	
+	"<% .Files.Repository %>/internal/billing"
+<%- end %>
+)
 
 const gracefulShutdownTimeout = 10 * time.Second
 
@@ -46,6 +50,14 @@ func main() {
 	})
 
 <%if eq (index .Params `userAuth`) "yes" %>	r.HandleFunc("/auth/userInfo", auth.GetUserInfo)
+
+<% if eq (index .Params `billingEnabled`) "yes" %>
+	r.Handle("/billing/", billing.Handler)
+	r.HandleFunc("/webhook/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("webhook received, %q", html.EscapeString(r.URL.Path))
+		w.Write([]byte("webhook received"))
+	})
+<%- end %>
 
 <% end %>	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))

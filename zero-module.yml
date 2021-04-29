@@ -141,6 +141,35 @@ parameters:
     - action: KeyMatchCondition
       matchField: CIVendor
       whenValue: "circleci"
+  - field: billingEnabled
+    label: "Provides a subscription example using stripe in backend and frontend repository, this includes the checkout feature so you must have a verified(with bank account setup) Stripe account to use these features"
+    options:
+      "yes": "Yes"
+      "no": "No"
+  - field: stagingStripePublicApiKey
+    label: "Staging Stripe public api key, used for frontend repository (Recommended: using sandbox key while setting up)"
+    conditions:
+    - action: KeyMatchCondition
+      matchField: billingEnabled
+      whenValue: "yes"
+  - field: stagingStripeSecretApiKey
+    label: "Staging Stripe secret api key, used for backend repository (Recommended: using sandbox key while setting up)"
+    conditions:
+    - action: KeyMatchCondition
+      matchField: billingEnabled
+      whenValue: "yes"
+  - field: productionStripePublicApiKey
+    label: "Production Stripe public api key, used for frontend repository (Recommended: using sandbox key while setting up)"
+    conditions:
+    - action: KeyMatchCondition
+      matchField: billingEnabled
+      whenValue: "yes"
+  - field: productionStripeSecretApiKey
+    label: "Production Stripe secret api key, used for backend repository (Recommended: using sandbox key while setting up)"
+    conditions:
+    - action: KeyMatchCondition
+      matchField: billingEnabled
+      whenValue: "yes"
 conditions:
   - action: ignoreFile
     matchField: userAuth
@@ -165,3 +194,9 @@ conditions:
     whenValue: "github-actions"
     data:
     - .circleci/
+  - action: ignoreFile
+    matchField: billingEnabled
+    whenValue: "no"
+    data:
+    - internal/billing
+    - scripts/stripe-example-setup.sh

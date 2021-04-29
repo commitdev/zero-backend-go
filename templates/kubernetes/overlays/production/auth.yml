@@ -7,7 +7,7 @@ metadata:
   name: public-backend-endpoints
 spec:
   match:
-    url: http://<% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>/status/<.*>
+    url: http://<% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>/<(status|webhook)\/.*>
 ---
 ## Backend User-restricted endpoint
 # pattern: http://<proxy>/<not [/.ory/kratos and /status]>
@@ -21,5 +21,5 @@ metadata:
   name: authenticated-backend-endpoints
 spec:
   match:
-    url: http://<% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>/<(?!(status|\.ory\/kratos)).*>
+    url: http://<% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>/<(?!(status|webhook|\.ory\/kratos)).*>
 

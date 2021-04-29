@@ -12,7 +12,7 @@ PROJECT_NAME := ${PROJECT_NAME}
 
 .EXPORT_ALL_VARIABLES:
 
-run: ci_setup
+run: ci_setup billing_setup
 	@echo "\nDone"
 
 ci_setup:
@@ -22,6 +22,11 @@ ci_setup: github_actions_setup
 endif
 ifeq ($(CIVendor), circleci)
 ci_setup: circle_ci_setup
+endif
+
+billing_setup:
+ifeq ($(billingEnabled), yes)
+	sh scripts/setup-stripe-secrets.sh
 endif
 
 circle_ci_setup:
