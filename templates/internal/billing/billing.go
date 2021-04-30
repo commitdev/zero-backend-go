@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -165,11 +166,9 @@ func cancel(w http.ResponseWriter, r *http.Request) {
 }
 
 func mapToQueryString(data map[string]string) string {
-	i := 0
-	params := make([]string, len(data))
+	queryString := url.Values{}
 	for k, v := range data {
-		params[i] = fmt.Sprintf("%s=%s", k, v)
-		i++
+		queryString.Add(k, v)
 	}
-	return strings.Join(params, "&")
+	return queryString.Encode()
 }

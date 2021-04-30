@@ -215,7 +215,7 @@ ALTER TABLE address
 A subscription and checkout example using [Stripe](https://stripe.com), coupled with the frontend repository to provide an end-to-end checkout example for you to customize. We also setup a webhook and an endpoint in the backend to receive webhook when events occur.
 
 ### Setup
-We have setup for you in the stripe platform
+The following example content has been set up in Stripe:
 - 1 product
 - 3 prices(subscriptions) [annual, monthly, daily]
 - 1 webhook [`charge.failed`, `charge.succeeded`, `customer.created`, `subscription_schedule.created`] 
@@ -224,7 +224,7 @@ See link for available webhooks: https://stripe.com/docs/api/webhook_endpoints/c
 this is setup using the script [scripts/stripe-example-setup.sh](scripts/stripe-example-setup.sh)
 
 ### Deployment
-The deployment only requires the environment variables 
+The deployment only requires the environment variables:
 - STRIPE_API_SECRET_KEY (created in AWS secret then deployed via Kubernetes Secret)
 - FRONTEND_URL (used for sending user back to frontend upon checkouts)
 - BACKEND_URL (used for redirects after checkout and webhooks)
