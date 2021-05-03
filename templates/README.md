@@ -180,6 +180,15 @@ Copy this presigned url and paste it into your browser, then done.
 curl --location --request GET '[presigned url for download]'
 ```
 
+<%if eq (index .Params `apiType`) "graphql" %>
+# GraphQL Schema Updates
+After making changes to the `/graph/schema.graphqls` GraphQL schema, run the following command to generate new resolver implementation stubs:
+
+```
+$ go generate ./...
+```
+<% end %>
+
 # Database Migration
 Database migrations are handled with [Flyway](https://flywaydb.org/). Migrations run in a docker container started in the Kubernetes cluster by CircleCI or the local dev environment startup process.
 
