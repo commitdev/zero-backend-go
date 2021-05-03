@@ -15,5 +15,5 @@ configMapGenerator:
   behavior: merge
   literals:
     - ENVIRONMENT=staging
-    - BACKEND_URL=https://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
-    - FRONTEND_URL=https://<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>
+    - BACKEND_HOST=<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
+    - FRONTEND_HOST=<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>

@@ -15,8 +15,8 @@ import (
 <%- end %>
 )
 
-var backendURL = os.Getenv("BACKEND_URL")
-var frontendURL = os.Getenv("FRONTEND_URL")
+var backendHost = os.Getenv("BACKEND_HOST")
+var frontendHost = os.Getenv("FRONTEND_HOST")
 
 var Handler = getHandler()
 var stripe *client.API
@@ -98,8 +98,8 @@ func checkout(w http.ResponseWriter, r *http.Request) {
 		Price:    &price.ID,
 		Quantity: &checkoutQuantity,
 	}
-	successURL := backendURL + "/billing/success?session_id={CHECKOUT_SESSION_ID}"
-	cancelURL := backendURL + "/billing/cancel?session_id={CHECKOUT_SESSION_ID}"
+	successURL := "https://" + backendHost + "/billing/success?session_id={CHECKOUT_SESSION_ID}"
+	cancelURL := "https://" + backendHost + "/billing/cancel?session_id={CHECKOUT_SESSION_ID}"
 <% if eq (index .Params `userAuth`) "yes" %>
 	authErr, userInfo := auth.GetUserInfoFromHeaders(r)
 	clientReferenceID := userInfo.ID
@@ -143,7 +143,12 @@ func success(w http.ResponseWriter, r *http.Request) {
 		"reference":      string(session.ClientReferenceID),
 	}
 
-	redirectURL := fmt.Sprintf("%s%s?%s", frontendURL, "/billing/confirmation", mapToQueryString(data))
+	baseUrl := url.URL{
+		Scheme: "https",
+		Host:   frontendHost,
+		Path:   "/billing/confirmation",
+	}
+	redirectURL := fmt.Sprintf("%s?%s", baseUrl.String(), mapToQueryString(data))
 	http.Redirect(w, r, redirectURL, 302)
 }
 
@@ -161,7 +166,12 @@ func cancel(w http.ResponseWriter, r *http.Request) {
 		"currency":       string(session.Currency),
 		"reference":      string(session.ClientReferenceID),
 	}
-	redirectURL := fmt.Sprintf("%s%s?%s", frontendURL, "/billing/confirmation", mapToQueryString(data))
+	baseUrl := url.URL{
+		Scheme: "https",
+		Host:   frontendHost,
+		Path:   "/billing/confirmation",
+	}
+	redirectURL := fmt.Sprintf("%s?%s", baseUrl.String(), mapToQueryString(data))
 	http.Redirect(w, r, redirectURL, 302)
 }
 

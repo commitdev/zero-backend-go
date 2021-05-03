@@ -226,8 +226,8 @@ this is setup using the script [scripts/stripe-example-setup.sh](scripts/stripe-
 ### Deployment
 The deployment only requires the environment variables:
 - STRIPE_API_SECRET_KEY (created in AWS secret then deployed via Kubernetes Secret)
-- FRONTEND_URL (used for sending user back to frontend upon checkouts)
-- BACKEND_URL (used for redirects after checkout and webhooks)
+- FRONTEND_HOST (used for sending user back to frontend upon checkouts)
+- BACKEND_HOST (used for redirects after checkout and webhooks)
 
 <% end %>
 <!-- Links -->
