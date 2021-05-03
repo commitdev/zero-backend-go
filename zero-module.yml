@@ -160,14 +160,6 @@ conditions:
     matchField: apiType
     whenValue: "rest"
     data:
-    - src/graphql
-    - src/graphql.js
-    - src/db/model/Trip.js
-    - src/service/trip.js
-  - action: ignoreFile
-    matchField: apiType
-    whenValue: "rest"
-    data:
     - gqlgen.yml
     - graph/
   - action: ignoreFile
