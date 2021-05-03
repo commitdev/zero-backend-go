@@ -13,12 +13,17 @@ import (
 	"syscall"
 	"time"
 
+<%if eq (index .Params `apiType`) "graphql" %>
+	"github.com/99designs/gqlgen/graphql/handler"
+	"<% .Files.Repository %>/graph"
+	"<% .Files.Repository %>/graph/generated"
+<% end %>
 
 	"<% .Files.Repository %>/internal/database"
-<%if eq (index .Params `fileUploads`) "yes" %>	
+<%if eq (index .Params `fileUploads`) "yes" %>
     "<% .Files.Repository %>/internal/file"
 <% end %>
-<%if eq (index .Params `userAuth`) "yes" %>	
+<%if eq (index .Params `userAuth`) "yes" %>
 	"<% .Files.Repository %>/internal/auth"
 <% end %>)
 
@@ -30,6 +35,11 @@ func main() {
 	// start database connection and run a query
 	db := database.Connect()
 	db.TestConnection()
+
+<%if eq (index .Params `apiType`) "graphql" %>
+	// create graphql server
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+<% end %>
 
 	r := http.NewServeMux()
 	r.HandleFunc("/status/ready", readinessCheckEndpoint)
@@ -52,12 +62,14 @@ func main() {
 		log.Printf("Hello, %q", html.EscapeString(r.URL.Path))
 	})
 
-
 <%if eq (index .Params `fileUploads`) "yes" %>
 	r.HandleFunc("/file/presigned", file.PresignedUploadURL)
 	r.HandleFunc("/file", file.PresignedDownloadURL)
 <% end %>
 
+<%if eq (index .Params `apiType`) "graphql" %>
+	r.HandleFunc("/query", srv)
+<% end %>
 
 	serverAddress := fmt.Sprintf("0.0.0.0:%s", os.Getenv("SERVER_PORT"))
 	server := &http.Server{Addr: serverAddress, Handler: r}

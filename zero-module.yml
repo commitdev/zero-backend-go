@@ -34,6 +34,9 @@ parameters:
     - action: KeyMatchCondition
       whenValue: "yes"
       matchField: useExistingAwsProfile
+  - field: accountId
+    label: AWS Account ID
+    execute: aws sts get-caller-identity --query "Account" | tr -d '"'
   - field: accessKeyId
     label: AWS AccessKeyId
     envVarName: "AWS_ACCESS_KEY_ID"
@@ -108,9 +111,6 @@ parameters:
       "none": "none"
       "redis": "Redis"
       "memcached": "Memcached"
-  - field: accountId
-    label: AWS Account ID
-    execute: aws sts get-caller-identity --query "Account" | tr -d '"'
   - field: randomSeed
     label: Random seed that will be shared between projects to come up with deterministic resource names
     execute: uuidgen | head -c 8
@@ -128,6 +128,12 @@ parameters:
     options:
       "yes": "Yes"
       "no": "No"
+  - field: apiType
+    label: What type of API do you want to expose?
+    default: rest
+    options:
+      "rest": "REST API"
+      "graphql": "GraphQL"
   - field: CIVendor
     label: Using either circleCI or github Actions to build / test your repository
     default: "circleci"
@@ -150,6 +156,20 @@ conditions:
     - kubernetes/base/auth.yml
     - kubernetes/overlays/staging/auth.yml
     - kubernetes/overlays/production/auth.yml
+  - action: ignoreFile
+    matchField: apiType
+    whenValue: "rest"
+    data:
+    - src/graphql
+    - src/graphql.js
+    - src/db/model/Trip.js
+    - src/service/trip.js
+  - action: ignoreFile
+    matchField: apiType
+    whenValue: "rest"
+    data:
+    - gqlgen.yml
+    - graph/
   - action: ignoreFile
     matchField: fileUploads
     whenValue: "no"
