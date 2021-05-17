@@ -21,6 +21,14 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |-- Makefile                        #make command triggers the initialization of repository
 |-- zero-module.yml                 #module declares required parameters and credentials
 |   # files in templates become the repo for users
+|   scripts/
+|   |   # these are scripts called only once during zero apply, and we don't
+|   |   # expect a need to rerun them throughout development of the  repository
+|   |   # used for checking binary requires / setting up CI / secrets
+|   |   |-- check.sh
+|   |   |-- gha-setup.sh
+|   |   |-- required-bins.sh
+|   |   |-- setup-stripe-secrets.sh
 |   templates/
 |   |   # this makefile is used both during init and
 |   |   # on-going needs/utilities for user to maintain their infrastructure
@@ -31,8 +39,8 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 |       |   |-- deployment.yml
 |       |   |-- kustomization.yml
 |       |   |-- service.yml
-│       ├── migration/
-│       │   └── job.yml
+|       |-- migration/
+|       |   |-- job.yml
 |       |-- overlays/
 |       |   |-- production/
 |       |   |   |-- deployment.yml

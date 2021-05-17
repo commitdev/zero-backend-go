@@ -17,3 +17,5 @@ configMapGenerator:
   behavior: merge
   literals:
     - ENVIRONMENT=production
+    - BACKEND_HOST=<% index .Params `productionBackendSubdomain` %><% index .Params `productionHostRoot` %>
+    - FRONTEND_HOST=<% index .Params `productionFrontendSubdomain` %><% index .Params `productionHostRoot` %>
