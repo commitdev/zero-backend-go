@@ -7,6 +7,7 @@ patchesStrategicMerge:
 resources:
 - ../../base
 - ingress.yml
+- external-secret.yml
 
 configMapGenerator:
 - name: <% .Name %>-config

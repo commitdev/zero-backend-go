@@ -7,6 +7,7 @@ patchesStrategicMerge:
 <% end %>
 resources:
 - ../../base
+- external-secret.yml
 <%if eq (index .Params `userAuth`) "yes" %>## userAuth enabled - Oathkeeper proxies to backend instead of ingress
 # - ingress.yml
 <% else %>- ingress.yml<% end %>
