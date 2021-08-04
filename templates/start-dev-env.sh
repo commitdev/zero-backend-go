@@ -105,7 +105,7 @@ MIGRATION_NAME=${PROJECT_NAME}-migration
 SQL_DIR="${PWD}/database/migration"
 ## launch migration job
 (cd kubernetes/migration && \
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} --from-file ${SQL_DIR}/*.sql || error_exit "Failed to apply kubernetes migration configmap" && \
+    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} $(ls  ${SQL_DIR}/*.sql | xargs printf '\-\-from\-file %s ') || error_exit "Failed to apply kubernetes migration configmap" && \
     cat job.yml | \
     sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"

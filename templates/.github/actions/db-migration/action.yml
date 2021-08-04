@@ -23,7 +23,7 @@ runs:
       if [ `ls ${SQL_DIR}/*.sql 2>/dev/null | wc -l` -gt 0 ] ; then
         pushd kubernetes/migration
         kubectl -n $NAMESPACE delete configmap $MIGRATION_NAME || echo "no migration configmap existing for deletion"
-        kubectl -n $NAMESPACE create configmap $MIGRATION_NAME --from-file ${SQL_DIR}/*.sql
+        kubectl -n $NAMESPACE create configmap $MIGRATION_NAME $(ls  ${SQL_DIR}/*.sql | xargs printf '--from-file %s ')
 
         kubectl -n $NAMESPACE create -f job.yml
         if ! kubectl -n $NAMESPACE wait --for=condition=complete --timeout=180s job/$MIGRATION_NAME ; then
