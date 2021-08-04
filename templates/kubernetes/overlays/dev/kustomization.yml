@@ -3,6 +3,8 @@ kind: Kustomization
 
 patchesStrategicMerge:
 - deployment.yml
+<%if eq (index .Params `userAuth`) "yes" %>- auth.yml
+<% end %>
 
 resources:
 - ../../base

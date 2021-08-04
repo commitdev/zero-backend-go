@@ -10,7 +10,6 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
     # CORS
-    nginx.ingress.kubernetes.io/enable-cors: "true"
     ## to support both frontend origin and 'localhost', need 'configuration-snippet' implementation here, because 'cors-allow-origin' field doesn't support multiple originss yet.
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($http_origin ~* "^https?://((?:<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>)|(?:localhost))") {
@@ -22,6 +21,7 @@ metadata:
 
       if ($cors = "true") {
         add_header 'Access-Control-Allow-Origin' "$http_origin" always;
+        add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
         add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
@@ -29,6 +29,7 @@ metadata:
 
       if ($cors = "trueoptions") {
         add_header 'Access-Control-Allow-Origin' "$http_origin";
+        add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS';
         add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
