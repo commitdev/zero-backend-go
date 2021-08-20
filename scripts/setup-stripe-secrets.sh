@@ -15,11 +15,10 @@ else
 fi
 
 SECRET_NAME=${PROJECT_NAME}/kubernetes/${ENVIRONMENT}/${PROJECT_NAME}
-BASE64_TOKEN=$(printf ${SECRET_API_KEY} | base64)
 
 # Modify existing application secret to add stripe api key
 UPDATED_SECRET=$(aws secretsmanager get-secret-value --region ${REGION} --secret=${SECRET_NAME} --query "SecretString" --output text | \
-  jq --arg STRIPE_API_SECRET_KEY ${BASE64_TOKEN} '.STRIPE_API_SECRET_KEY=$STRIPE_API_SECRET_KEY')
+  jq --arg STRIPE_API_SECRET_KEY ${SECRET_API_KEY} '.STRIPE_API_SECRET_KEY=$STRIPE_API_SECRET_KEY')
 aws secretsmanager update-secret --secret-id=${SECRET_NAME} --secret-string="${UPDATED_SECRET}"
 
 sh ${PROJECT_DIR}/scripts/stripe-example-setup.sh
