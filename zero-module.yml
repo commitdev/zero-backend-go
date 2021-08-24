@@ -1,5 +1,5 @@
-name: zero-deployable-backend
-description: 'zero module for a basic backend service running in kubernetes'
+name: zero-backend-go
+description: 'Zero module for a backend service in Go running in Kubernetes'
 author: 'Commit'
 zeroVersion: '>= 0.1.1'
 commands:
