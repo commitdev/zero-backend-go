@@ -1,4 +1,4 @@
-# Zero Deployable Backend
+# Zero Backend Service - Golang
 This is a [Zero][zero] module which sets up a
 service which can be deployed to the environment set up with [zero-aws-eks-stack][zero-infra].
 
@@ -78,7 +78,7 @@ This step is meant to be executed during `zero apply`, includes following steps:
 
 ### Frontend Repo
 
-The corresponding frontend for this app is [zero-deployable-react-frontend][zero-frontend].
+The corresponding frontend for this app is [zero-frontend-react][zero-frontend].
 
 ## Other links
 Project board: [zenhub][zenhub-board]
@@ -88,6 +88,6 @@ Project board: [zenhub][zenhub-board]
 <!-- Links -->
 [zero]: https://github.com/commitdev/zero
 [zero-infra]: https://github.com/commitdev/zero-aws-eks-stack
-[zero-frontend]: https://github.com/commitdev/zero-deployable-react-frontend
+[zero-frontend]: https://github.com/commitdev/zero-frontend-react
 
 [zenhub-board]: https://app.zenhub.com/workspaces/commit-zero-5da8decc7046a60001c6db44/board?filterLogic=any&repos=203630543,247773730,257676371,258369081

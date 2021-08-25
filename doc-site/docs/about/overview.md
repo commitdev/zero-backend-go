@@ -22,10 +22,10 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 
 ### Frontend Repo
 
-The corresponding frontend for this app is [zero-deployable-react-frontend][zero-frontend].
+The corresponding frontend for this app is [zero-frontend-react].
 
 
 <!-- Links -->
 [zero]: https://github.com/commitdev/zero
 [zero-infra]: https://github.com/commitdev/zero-aws-eks-stack
-[zero-frontend]: https://github.com/commitdev/zero-deployable-react-frontend
+[zero-frontend-react]: https://github.com/commitdev/zero-frontend-react
