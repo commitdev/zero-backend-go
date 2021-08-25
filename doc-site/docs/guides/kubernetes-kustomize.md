@@ -13,7 +13,7 @@ kubectl -n <APP_NAME> get pods
 You can update the resource limits in the [kubernetes/base/deployment.yml][base-deployment], and control fine-grain customizations based on environment and specific deployments such as Scaling out your production replicas from the [overlays configurations][env-prod]
 
 
-[base-cronjob]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/kubernetes/base/cronjob.yml
-[base-deployment]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/kubernetes/base/deployment.yml
-[env-prod]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/kubernetes/overlays/production/deployment.yml
-[circleci-details]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/.circleci/README.md
+[base-cronjob]: https://github.com/commitdev/zero-backend-go/tree/main/templates/kubernetes/base/cronjob.yml
+[base-deployment]: https://github.com/commitdev/zero-backend-go/tree/main/templates/kubernetes/base/deployment.yml
+[env-prod]: https://github.com/commitdev/zero-backend-go/tree/main/templates/kubernetes/overlays/production/deployment.yml
+[circleci-details]: https://github.com/commitdev/zero-backend-go/tree/main/templates/.circleci/README.md

@@ -38,5 +38,5 @@ Your repository comes with a protected branch `master` and you can edit Branch p
 By default it requires `[lint, unit-test]` to be passing to allow Pull requests to merge.
 <% end %>
 
-[circleci-details]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/.circleci/README.md
-[github-actions]: https://github.com/commitdev/zero-deployable-node-backend/tree/main/templates/.github/workflows/ci.yml
+[circleci-details]: https://github.com/commitdev/zero-backend-go/tree/main/templates/.circleci/README.md
+[github-actions]: https://github.com/commitdev/zero-backend-go/tree/main/templates/.github/workflows/ci.yml
