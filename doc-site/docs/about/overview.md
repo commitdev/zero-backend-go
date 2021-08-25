@@ -22,7 +22,7 @@ This repository is language/business-logic agnostic; mainly showcasing some univ
 
 ### Frontend Repo
 
-The corresponding frontend for this app is [zero-frontend-react][zero-frontend].
+The corresponding frontend for this app is [zero-frontend-react].
 
 
 <!-- Links -->
