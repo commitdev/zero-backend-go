@@ -57,10 +57,6 @@ echo "  Cluster context: ${CLUSTER_CONTEXT}"
 
 # Validate secret
 NAMESPACE=${PROJECT_NAME}
-SECRET_NAME=${PROJECT_NAME}
-DEV_SECRET_NAME=devenv${PROJECT_NAME}
-DEV_SECRET_JSON=$(kubectl --context ${CLUSTER_CONTEXT} get secret ${DEV_SECRET_NAME} -n ${NAMESPACE} -o json)
-[[ -z "${DEV_SECRET_JSON}" ]] && error_exit "The secret ${DEV_SECRET_NAME} is not existing in namespace '${NAMESPACE}'."
 
 # Check installations
 if ! command_exist kustomize || ! command_exist telepresence; then
@@ -79,10 +75,6 @@ kubectl --context ${CLUSTER_CONTEXT} get namespace ${DEV_NAMESPACE} >& /dev/null
     kubectl --context ${CLUSTER_CONTEXT} create namespace ${DEV_NAMESPACE})
 echo "  Namespace: ${DEV_NAMESPACE}"
 
-# Setup dev secret from pre-configed one
-kubectl --context ${CLUSTER_CONTEXT} get secret ${SECRET_NAME} -n ${DEV_NAMESPACE} >& /dev/null || \
-    echo ${DEV_SECRET_JSON} | jq 'del(.metadata["namespace","creationTimestamp","resourceVersion","selfLink","uid"])' | sed "s/${DEV_SECRET_NAME}/${SECRET_NAME}/g" | kubectl --context ${CLUSTER_CONTEXT} apply -n ${DEV_NAMESPACE} -f -
-echo "  Secret: ${SECRET_NAME}"
 
 # Setup dev service account from pre-configured one
 SERVICE_ACCOUNT=backend-service
@@ -96,24 +88,26 @@ MY_EXT_HOSTNAME=${DEV_NAMESPACE}-${EXT_HOSTNAME}
 ECR_REPO=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${PROJECT_NAME}
 VERSION_TAG=latest
 DATABASE_NAME=<% index .Params `databaseName` %>
-DEV_DATABASE_NAME=$(echo "dev${MY_USERNAME}" | tr -dc 'A-Za-z0-9')
+DEV_DATABASE_NAME=$(echo "dev_${MY_USERNAME}" | tr -dc 'A-Za-z0-9_')
 echo "  Domain: ${MY_EXT_HOSTNAME}"
 echo "  Database Name: ${DEV_DATABASE_NAME}"
 
 # Apply migration
 MIGRATION_NAME=${PROJECT_NAME}-migration
 SQL_DIR="${PWD}/database/migration"
+if [ `ls ${SQL_DIR}/*.sql 2>/dev/null | wc -l` -gt 0 ] ; then
 ## launch migration job
-(cd kubernetes/migration && \
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} $(ls  ${SQL_DIR}/*.sql | xargs printf '\-\-from\-file %s ') || error_exit "Failed to apply kubernetes migration configmap" && \
-    cat job.yml | \
-    sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"
-## confirm migration job done
-if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_NAME} ; then
-    echo "${MIGRATION_NAME} run failed:"
-    kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_NAME}
-    error_exit "Failed migration. Leaving namespace ${DEV_NAMESPACE} for debugging"
+    (cd kubernetes/migration && \
+        kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create configmap ${MIGRATION_NAME} $(ls ${SQL_DIR}/*.sql | xargs printf '\-\-from\-file %s ') || error_exit "Failed to apply kubernetes migration configmap" && \
+        cat job.yml | \
+        sed "s|/${DATABASE_NAME}|/${DEV_DATABASE_NAME}|g" | \
+        kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} create -f - ) || error_exit "Failed to apply kubernetes migration"
+    ## confirm migration job done
+    if ! kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} wait --for=condition=complete --timeout=180s job/${MIGRATION_NAME} ; then
+        echo "${MIGRATION_NAME} run failed:"
+        kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} describe job ${MIGRATION_NAME}
+        error_exit "Failed migration. Leaving namespace ${DEV_NAMESPACE} for debugging"
+    fi
 fi
 
 # Apply manifests
