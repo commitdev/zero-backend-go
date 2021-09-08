@@ -7,6 +7,7 @@ PROJECT_NAME=<% .Name %>
 ENVIRONMENT=stage
 ACCOUNT_ID=<% index .Params `accountId` %>
 REGION=<% index .Params `region` %>
+CLUSTER_CONTEXT=${PROJECT_NAME}-${ENVIRONMENT}-${REGION}
 
 # common functions
 function usage() {
@@ -52,7 +53,6 @@ DEV_PROJECT_ID=${1:-""}
 echo '[Dev Environment]'
 
 # Validate cluster
-CLUSTER_CONTEXT=${PROJECT_NAME}-${ENVIRONMENT}-${REGION}
 echo "  Cluster context: ${CLUSTER_CONTEXT}"
 
 # Validate secret
@@ -84,7 +84,7 @@ kubectl --context ${CLUSTER_CONTEXT} get sa ${SERVICE_ACCOUNT} -n ${DEV_NAMESPAC
 # Setup dev k8s manifests, configuration, docker login etc
 CONFIG_ENVIRONMENT="dev"
 EXT_HOSTNAME=<% index .Params `stagingBackendSubdomain`  %><% index .Params `stagingHostRoot` %>
-MY_EXT_HOSTNAME=${DEV_NAMESPACE}-${EXT_HOSTNAME}
+MY_EXT_HOSTNAME="${DEV_NAMESPACE}.dev.${EXT_HOSTNAME}"
 ECR_REPO=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${PROJECT_NAME}
 VERSION_TAG=latest
 DATABASE_NAME=<% index .Params `databaseName` %>
@@ -114,7 +114,9 @@ fi
 (cd kubernetes/overlays/${CONFIG_ENVIRONMENT} && \
     kustomize build . | \
     sed "s|${EXT_HOSTNAME}|${MY_EXT_HOSTNAME}|g" | \
-    sed "s|DATABASE_NAME: ${DATABASE_NAME}|DATABASE_NAME: ${DEV_DATABASE_NAME}|g" | \
+    sed "s|{{ DEV_NAMESPACE }}|${DEV_NAMESPACE}|g" | \
+    sed "s|DATABASE_NAME: ${DATABASE_NAME}|DATABASE_NAME: ${DEV_DATABASE_NAME}|g" > kustomizebuild
+    exit 1
     kubectl --context ${CLUSTER_CONTEXT} -n ${DEV_NAMESPACE} apply -f - ) || error_exit "Failed to apply kubernetes manifests"
 
 # Confirm deployment
@@ -149,7 +151,11 @@ echo
 
 # Starting dev environment with telepresence shell
 echo
-telepresence --context ${CLUSTER_CONTEXT} --swap-deployment ${PROJECT_NAME} --namespace ${DEV_NAMESPACE} --expose 80 --run-shell
+telepresence \
+  --context ${CLUSTER_CONTEXT} --namespace ${DEV_NAMESPACE} \
+  intercept ${PROJECT_NAME} \
+  --port 80 \
+  -- bash
 
 # Ending dev environment
 ## delete the most of resources (except ingress related, as we hit rate limit of certificate issuer(letsencrypt)

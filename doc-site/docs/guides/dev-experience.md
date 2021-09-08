@@ -16,5 +16,5 @@ Now your service will have access to any dependencies within a namespace running
 
   1. Run `start-dev-env.sh` - You will be dropped into a shell that is the same as your local machine, but works as if it were running inside a pod in your k8s cluster
   2. Change code and run the server - As you run your local server, using local code, it will have access to remote dependencies, and will be sent traffic by the load balancer
-  3. Test on your cloud environment with real dependencies - `https://<your name>-<DOMAIN>`
+  3. Test on your cloud environment with real dependencies - `https://<your name>.dev.<DOMAIN>`
   4. git commit & auto-deploy to Staging through the build pipeline
