@@ -1,3 +1,14 @@
+<%- if eq (index .Params `userAuth`) "yes" %>
+## Allows cross namespace ingress -> service
+apiVersion: v1
+kind: Service
+metadata:
+  name: oathkeeper
+spec:
+  type: ExternalName
+  externalName: oathkeeper-<% .Name %>-proxy.user-auth.svc.cluster.local
+---
+<%- end %>
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -12,7 +23,7 @@ metadata:
     # CORS
     ## to support both frontend origin and 'localhost', need 'configuration-snippet' implementation here, because 'cors-allow-origin' field doesn't support multiple originss yet.
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($http_origin ~* "^https?://((?:<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>)|(?:localhost))") {
+      if ($http_origin ~* "^https?://((?:<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>)|(?:localhost))|(?:127.0.0.1))") {
         set $cors "true";
       }
       if ($request_method = 'OPTIONS') {
@@ -21,7 +32,7 @@ metadata:
 
       if ($cors = "true") {
         add_header 'Access-Control-Allow-Origin' "$http_origin" always;
-        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS' always;
         add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
@@ -29,7 +40,7 @@ metadata:
 
       if ($cors = "trueoptions") {
         add_header 'Access-Control-Allow-Origin' "$http_origin";
-        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, PATCH, OPTIONS';
         add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
@@ -41,14 +52,19 @@ metadata:
 
 spec:
   rules:
-  - host: <% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
+  - host: {{ DEV_NAMESPACE }}.dev.<% index .Params `stagingHostRoot` %>
     http:
       paths:
         - path: /(.*)
           backend:
+          <%- if eq (index .Params `userAuth`) "yes" %>
+            serviceName: oathkeeper
+            servicePort: 4455
+          <%- else %>
             serviceName: <% .Name %>
             servicePort: http
+          <%- end %>
   tls:
   - hosts:
-    - <% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
+    - {{ DEV_NAMESPACE }}.dev.<% index .Params `stagingHostRoot` %>
     secretName: <% .Name %>-tls-secret
