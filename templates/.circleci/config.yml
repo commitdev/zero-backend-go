@@ -269,7 +269,7 @@ jobs:
               exit 1
             fi
             MANIFEST=$(aws ecr batch-get-image --region << parameters.region >> --repository-name << parameters.repo >> --image-ids imageTag=latest --query 'images[].imageManifest' --output text)
-            aws ecr put-image --region << parameters.region >> --repository-name << parameters.repo >> --image-tag last-deployed --image-manifest "$MANIFEST"
+            aws ecr put-image --region << parameters.region >> --repository-name << parameters.repo >> --image-tag last-deployed --image-manifest "$MANIFEST" || echo "Image Tag already updated"
 
 workflows:
     version: 2
