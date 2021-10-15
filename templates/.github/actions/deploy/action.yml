@@ -46,4 +46,4 @@ runs:
       fi
       # Update the last-deployed tag to be used in dev environments
       MANIFEST=$(aws ecr batch-get-image --region ${{ inputs.region }} --repository-name ${{ inputs.repository-name }} --image-ids imageTag=${{ inputs.image-tag }} --query 'images[].imageManifest' --output text)
-      aws ecr put-image --region ${{ inputs.region }} --repository-name ${{ inputs.repository-name }} --image-tag last-deployed --image-manifest "$MANIFEST"
+      aws ecr put-image --region ${{ inputs.region }} --repository-name ${{ inputs.repository-name }} --image-tag last-deployed --image-manifest "$MANIFEST" || echo "Image Tag already updated"
