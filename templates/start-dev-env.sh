@@ -63,7 +63,7 @@ if ! command_exist kustomize || ! command_exist telepresence; then
     if ! command_exist kustomize; then
         error_exit "command 'kustomize' not found: please visit https://kubectl.docs.kubernetes.io/installation/kustomize/"
     fi
-    if ! command_exist kubectl; then
+    if ! command_exist telepresence; then
         error_exit "command 'telepresence' not found. You can download it at https://www.telepresence.io/reference/install"
     fi
 fi
