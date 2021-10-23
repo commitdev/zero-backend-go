@@ -9,4 +9,10 @@ require (
 <%- if eq (index .Params `billingEnabled`) "yes" %>
 	github.com/stripe/stripe-go/v72 v72.43.0
 <%- end %>
+<%- if eq (index .Params `cacheStore`) "redis" %>
+	github.com/go-redis/redis/v8 v8.11.4
+<%- end %>
+<%- if eq (index .Params `cacheStore`) "memcached" %>
+	github.com/bradfitz/gomemcache/memcache v0.0.0-20190913173617-a41fca850d0b
+<%- end %>
 )

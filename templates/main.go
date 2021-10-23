@@ -24,6 +24,9 @@ import (
 <%if eq (index .Params `billingEnabled`) "yes" %>	
 	"<% .Files.Repository %>/internal/billing"
 <%- end %>
+<%if neq (index .Params `cachestore`) "none" %>	
+    "<% .Files.Repository %>/internal/cachestore"
+<% end %>
 )
 
 const gracefulShutdownTimeout = 10 * time.Second
@@ -34,6 +37,11 @@ func main() {
 	// start database connection and run a query
 	db := database.Connect()
 	db.TestConnection()
+
+<%if neq (index .Params `cachestore`) "none" %>	
+	// test cacheStore connection
+	cachestore.TestConnection()
+<% end %>
 
 	r := http.NewServeMux()
 	r.HandleFunc("/status/ready", readinessCheckEndpoint)
