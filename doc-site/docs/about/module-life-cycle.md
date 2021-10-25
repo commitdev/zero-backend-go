@@ -26,7 +26,7 @@ _Run once only during `zero apply`_
 ## On-going
 ### Pull request
 - Unit test
-### Push to master branch
+### Push to master/main branch
 - Unit test
 - Build docker image
 - Deploy image to Staging cluster using Kustomize
