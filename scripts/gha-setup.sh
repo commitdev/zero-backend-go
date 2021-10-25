@@ -34,7 +34,7 @@ EOF
 	## Branch Protect for PRs
 	## By default we setup Pull-request checks of [lint, unit-test] in `.github/workflows/pull-request.yml`
 	## And we will enforce both the checks pass before PR can be merged into default branch
-	DEFAULT_BRANCH=master
+	DEFAULT_BRANCH=`git config --get init.defaultBranch || echo main`
 	curl -XPUT "https://api.github.com/repos/$GITHUB_ORG/$GITHUB_REPO/branches/$DEFAULT_BRANCH/protection" \
 	--header "Authorization: token $GITHUB_ACCESS_TOKEN" \
 	--header 'Content-Type: application/json' \
