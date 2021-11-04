@@ -3,11 +3,11 @@ package cachestore
 import (
 	"os"
 	"fmt"
-<%if eq (index .Params `cachestore`) "redis" %>	
+<%if eq (index .Params `cacheStore`) "redis" %>	
 	"context"
 	"github.com/go-redis/redis/v8"
 <% end %>
-<%if eq (index .Params `cachestore`) "memcached" %>	
+<%if eq (index .Params `cacheStore`) "memcached" %>	
 	"github.com/bradfitz/gomemcache/memcache"
 <% end %>
 )
@@ -15,7 +15,7 @@ import (
 var cacheEndpoint = os.Getenv("CACHE_ENDPOINT")
 var cachePort = os.Getenv("CACHE_PORT")
 
-<%if eq (index .Params `cachestore`) "redis" %>	
+<%if eq (index .Params `cacheStore`) "redis" %>	
 func TestConnection() {
 	context := context.Background()
 	rdb := redis.NewClient(&redis.Options{
@@ -31,7 +31,7 @@ func TestConnection() {
 }
 <% end %>
 
-<%if eq (index .Params `cachestore`) "memcached" %>	
+<%if eq (index .Params `cacheStore`) "memcached" %>	
 func TestConnection() {
 	mc := memcache.New(fmt.Sprintf("%s:%s", cacheEndpoint, cachePort))
 	err := mc.Set(&memcache.Item{Key: "cache-test", Value: []byte("value")})
