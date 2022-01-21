@@ -17,7 +17,7 @@ var cachePort = os.Getenv("CACHE_PORT")
 
 <%if eq (index .Params `cacheStore`) "redis" %>	
 func TestConnection() {
-	context := context.Background()
+	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", cacheEndpoint, cachePort),
 		Password: "", // no password set
