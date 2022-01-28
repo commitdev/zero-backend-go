@@ -24,7 +24,7 @@ import (
 <%if eq (index .Params `billingEnabled`) "yes" %>	
 	"<% .Files.Repository %>/internal/billing"
 <%- end %>
-<%if neq (index .Params `cacheStore`) "none" %>	
+<%if ne (index .Params `cacheStore`) "none" %>
     "<% .Files.Repository %>/internal/cachestore"
 <% end %>
 )
@@ -38,7 +38,7 @@ func main() {
 	db := database.Connect()
 	db.TestConnection()
 
-<%if neq (index .Params `cacheStore`) "none" %>	
+<%if ne (index .Params `cacheStore`) "none" %>
 	// test cacheStore connection
 	cachestore.TestConnection()
 <% end %>
