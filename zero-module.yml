@@ -1,7 +1,7 @@
 name: zero-backend-go
 description: 'Zero module for a backend service in Go running in Kubernetes'
 author: 'Commit'
-zeroVersion: '>= 0.1.1'
+zeroVersion: '>= 0.2.1'
 commands:
   check: sh scripts/check.sh
 
